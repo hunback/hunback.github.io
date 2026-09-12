@@ -1,16 +1,16 @@
 BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//Hunbaek and Jiwoo//Wedding//KO
+PRODID:-//Hunbaek and Jiwoo//Wedding Invitation//KO
 CALSCALE:GREGORIAN
-METHOD:PUBLISH
 BEGIN:VEVENT
-UID:hunbaek-jiwoo-20261219@wedding.local
-DTSTAMP:20260906T160000Z
+UID:20261219-hunbaek-jiwoo@hunback.github.io
+DTSTAMP:20260911T000000Z
 DTSTART:20261219T033000Z
 SUMMARY:박훈백 · 최지우 결혼식
-LOCATION:더테라스웨딩 11층 더테라스 홀\n경기 고양시 일
+LOCATION:더테라스웨딩 11층 더테라스 홀\, 경기 고양시 일
  산동구 강석로 9
-DESCRIPTION:2026년 12월 19일 토요일 낮 12시 30분\n3호선 백석
- 역 5번 출구
+DESCRIPTION:2026년 12월 19일 토요일 낮 12시 30분\n더테라스웨
+ 딩 11층 더테라스 홀
+URL:https://hunback.github.io/
 END:VEVENT
 END:VCALENDAR
