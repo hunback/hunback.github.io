@@ -21,15 +21,18 @@
     clearTimeout(state.toastTimer); state.toastTimer = setTimeout(() => { el.hidden = true; }, 3300);
   }
   async function copy(text) {
-    try { await navigator.clipboard.writeText(text); toast('복사했습니다.'); }
+    try { await navigator.clipboard.writeText(text); toast('복사했습니다.'); return true; }
     catch (_) {
       const area = node('textarea'); area.value = text; area.setAttribute('readonly', '');
       area.style.position = 'fixed'; area.style.left = '-9999px'; document.body.append(area); area.select();
-      const done = document.execCommand('copy'); area.remove(); toast(done ? '복사했습니다.' : '복사할 내용을 길게 눌러 선택해 주세요.');
+      let done = false;
+      try { done = document.execCommand('copy'); } catch (_) { /* Keep the visible number selectable. */ }
+      area.remove(); toast(done ? '복사했습니다.' : '복사할 내용을 길게 눌러 선택해 주세요.');
+      return done;
     }
   }
   async function api(path, method = 'GET', payload) {
-    if (isFilePreview) throw new Error('파일 미리보기에서는 전송되지 않습니다. Start.command로 로컬 서버를 실행해 주세요.');
+    if (isFilePreview) throw new Error('파일 미리보기에서는 저장할 수 없습니다. 실제 청첩장 또는 Start-Local.cmd로 실행한 로컬 주소를 이용해 주세요.');
     if (method === 'POST' && payload && typeof payload.password === 'string' && state.passwordProtocol === 'pbkdf2-sha256-600000-v1') {
       const toHex = bytes => [...new Uint8Array(bytes)].map(n => n.toString(16).padStart(2, '0')).join('');
       const deletion = /^\/guestbook\/(\d+)\/delete$/.exec(path);
@@ -66,6 +69,11 @@
       else if (state.mode === 'local-preview') status.textContent = '로컬 확인용입니다. 작성 내용은 이 컴퓨터에만 저장됩니다.';
     }
     dialog.showModal();
+    if (!state.api && !isFilePreview && (id === '#guestbook-dialog' || id === '#rsvp-dialog')) {
+      connect().then(() => {
+        if (state.api) $('.form-status', dialog).textContent = state.mode === 'local-preview' ? '로컬 확인용입니다. 작성 내용은 이 컴퓨터에만 저장됩니다.' : '';
+      });
+    }
   }
   $$('[data-close]').forEach(button => button.addEventListener('click', () => button.closest('dialog').close()));
   $$('dialog').forEach(dialog => {
@@ -152,14 +160,47 @@
   document.addEventListener('touchstart', event => { if (event.touches.length > 1 && event.target.closest('.protected-media')) event.preventDefault(); }, { passive: false });
   document.addEventListener('gesturestart', event => { if (event.target.closest('.protected-media')) event.preventDefault(); }, { passive: false });
 
-  // Gentle single-use reveals; content remains visible if JS or IntersectionObserver fails.
-  if (!reduced.matches && 'IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(entries => entries.forEach(entry => {
-      if (entry.isIntersecting) { entry.target.classList.remove('is-pending'); entry.target.classList.add('is-visible'); observer.unobserve(entry.target); }
-    }), { threshold: .05, rootMargin: '0px 0px 20px 0px' });
-    $$('.reveal').forEach(el => { if (el.getBoundingClientRect().top > innerHeight) el.classList.add('is-pending'); observer.observe(el); });
-    reduced.addEventListener('change', () => { if (reduced.matches) { observer.disconnect(); $$('.is-pending').forEach(el => el.classList.remove('is-pending')); } });
+  // Register static AND subsequently rendered content. Never hide anything unless
+  // an observer exists; deep links, keyboard focus and reduced motion stay usable.
+  const revealRegistry = new WeakSet();
+  const revealObserver = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.remove('is-pending');
+      entry.target.classList.add('is-visible');
+      revealObserver.unobserve(entry.target);
+    });
+  }, { threshold: .08, rootMargin: '0px 0px -36px 0px' }) : null;
+  function observeReveals(root = document) {
+    const elements = [...(root.matches?.('.reveal') ? [root] : []), ...$$('.reveal', root)];
+    elements.forEach(el => {
+      if (revealRegistry.has(el)) return;
+      revealRegistry.add(el);
+      if (!revealObserver || el.getBoundingClientRect().top < innerHeight - 36) {
+        el.classList.add('is-visible'); return;
+      }
+      el.classList.add('is-pending'); revealObserver.observe(el);
+    });
   }
+  let motionChoice = null;
+  try { motionChoice = localStorage.getItem('wedding-motion'); } catch (_) { /* Storage is optional. */ }
+  function setMotion() {
+    const mode = ['full', 'reduce'].includes(motionChoice) ? motionChoice : reduced.matches ? 'reduce' : 'full';
+    document.documentElement.dataset.motion = mode;
+    const button = $('#motion-toggle'); button.hidden = false;
+    button.textContent = mode === 'reduce' ? '스크롤 움직임 켜기' : '움직임 줄이기';
+    button.setAttribute('aria-pressed', String(mode === 'reduce'));
+  }
+  setMotion(); reduced.addEventListener('change', setMotion);
+  $('#motion-toggle').addEventListener('click', () => {
+    motionChoice = document.documentElement.dataset.motion === 'reduce' ? 'full' : 'reduce';
+    try { localStorage.setItem('wedding-motion', motionChoice); } catch (_) { /* Storage is optional. */ }
+    setMotion();
+  });
+  document.addEventListener('focusin', event => {
+    const pending = event.target.closest('.is-pending');
+    if (pending) { pending.classList.remove('is-pending'); pending.classList.add('is-visible'); revealObserver?.unobserve(pending); }
+  });
 
   // December 2026: 1st Tuesday, wedding on Saturday the 19th.
   const calendar = $('#calendar');
@@ -195,28 +236,31 @@
   }
 
   function renderMorePhotos() {
-    const end = Math.min(state.galleryCount + 8, photos.length); const grid = $('#gallery-grid');
+    const end = Math.min(state.galleryCount + (state.galleryCount ? 8 : 6), photos.length); const grid = $('#gallery-grid');
     for (let index = state.galleryCount; index < end; index++) {
       const photo = photos[index];
       const groupStart = index === 0 || photo.group !== photos[index - 1].group;
-      if (groupStart) grid.append(node('h3', 'group-label', photo.group));
-      const figure = node('figure', `${groupStart || photo.width > photo.height ? 'featured' : ''}`);
-      const button = node('button', 'gallery-photo protected-media reveal'); button.type = 'button';
+      if (groupStart) grid.append(node('h3', 'group-label reveal', photo.group));
+      const figure = node('figure', `reveal photo-reveal ${groupStart || photo.width > photo.height ? 'featured' : ''}`);
+      figure.style.setProperty('--reveal-delay', `${index % 2 * 90}ms`);
+      const button = node('button', 'gallery-photo protected-media'); button.type = 'button';
       button.setAttribute('aria-label', `${photo.alt} 크게 보기`);
       const img = node('img'); const stem = `assets/photos/photo-${String(photo.id).padStart(2,'0')}`; img.src = asset(`${stem}-small.webp`);
       if (!window.WEDDING_ASSET_MAP) img.srcset = `${stem}-small.webp 560w, ${stem}.webp 1200w`;
-      img.sizes = photo.width > photo.height ? '(max-width: 430px) 92vw, 396px' : '(max-width: 430px) 44vw, 194px';
+      img.sizes = groupStart || photo.width > photo.height ? '(max-width: 430px) 92vw, 396px' : '(max-width: 430px) 44vw, 194px';
       img.alt = photo.alt; img.width = photo.width; img.height = photo.height; img.loading = 'lazy'; img.decoding = 'async'; img.draggable = false;
       button.append(img); button.addEventListener('click', () => openPhoto(photo)); figure.append(button); grid.append(figure);
     }
     state.galleryCount = end; $('#gallery-more').hidden = end >= photos.length;
     $('#photo-counter').textContent = `${end} / ${photos.length}`;
+    observeReveals(grid);
   }
   $('#gallery-more').addEventListener('click', renderMorePhotos); renderMorePhotos();
 
   function renderEmpty(message) {
-    const card = node('article', 'guest-card empty-card'); const flower = flowerIcon();
+    const card = node('article', 'guest-card empty-card reveal'); const flower = flowerIcon();
     card.append(flower, node('p', '', message)); $('#guestbook-list').replaceChildren(card); $('#guestbook-list').setAttribute('aria-busy', 'false');
+    observeReveals(card);
   }
   function flowerIcon() {
     const span = node('span', 'flower'); span.setAttribute('aria-hidden','true');
@@ -227,7 +271,7 @@
     const dot=document.createElementNS(NS,'circle'); dot.setAttribute('cx','16');dot.setAttribute('cy','16');dot.setAttribute('r','2.5');dot.setAttribute('fill','#fcfaf7');svg.append(dot);span.append(svg);return span;
   }
   function guestCard(entry) {
-    const card = node('article', 'guest-card'); card.dataset.id = entry.id;
+    const card = node('article', 'guest-card reveal'); card.dataset.id = entry.id;
     const flower = flowerIcon();
     const remove = node('button', 'guest-delete', '×'); remove.type = 'button'; remove.setAttribute('aria-label', `${entry.name}님의 방명록 삭제`);
     remove.addEventListener('click', () => { state.deleteId = entry.id; $('#delete-form').reset(); openDialog('#delete-dialog'); });
@@ -243,11 +287,19 @@
       data.items.forEach(entry => list.append(guestCard(entry)));
       if (!list.childElementCount) renderEmpty('아직 남겨진 축하 글이 없습니다. 첫 마음을 남겨주세요.');
       state.before = data.nextBefore; $('#guestbook-more').hidden = !data.nextBefore;
-    } catch (error) { if (!append) renderEmpty('축하 글을 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.'); $('#connection-status').textContent = error.message; }
+      $('#guestbook-retry').hidden = true;
+      $('#connection-status').textContent = state.mode === 'local-preview' ? '로컬 미리보기 · 이 컴퓨터의 테스트 기록만 표시됩니다.' : '';
+      observeReveals(list);
+    } catch (error) { if (!append) renderEmpty('축하 글을 불러오지 못했습니다. 다시 불러오기를 눌러 주세요.'); $('#connection-status').textContent = error.message; $('#guestbook-retry').hidden = false; }
     finally { list.setAttribute('aria-busy', 'false'); }
   }
   $('#guestbook-more').addEventListener('click', async event => { event.currentTarget.disabled = true; await loadGuests(true); event.currentTarget.disabled = false; });
-  async function connect() {
+  let connectionTask;
+  function connect() {
+    if (!connectionTask) connectionTask = connectOnce().finally(() => { connectionTask = null; });
+    return connectionTask;
+  }
+  async function connectOnce() {
     if (isFilePreview) { renderEmpty('두 사람에게 따뜻한 축하의 마음을 남겨주세요.'); $('#connection-status').textContent = '파일 미리보기 · 실제 방명록 서버 미연결'; $('#local-status').hidden = false; return; }
     try {
       const health = await api('/health');
@@ -259,9 +311,14 @@
     } catch (_) {
       renderEmpty('두 사람에게 따뜻한 축하의 마음을 남겨주세요.');
       $('#connection-status').textContent = '접수 서버 연결 전입니다. 현재는 작성 화면만 확인할 수 있습니다.';
+      $('#guestbook-retry').hidden = false;
       if (localHost) $('#local-status').hidden = false;
     }
   }
+  $('#guestbook-retry').addEventListener('click', async event => {
+    const button = event.currentTarget; button.disabled = true;
+    try { await connect(); } finally { button.disabled = false; }
+  });
   connect();
   function fieldError(id, message) { const input = $(`#${id}`); const error = $(`#${id}-error`); if (input) input.setAttribute('aria-invalid', String(!!message)); if (error) error.textContent = message; }
   function status(form, text, success = false) { const el = $('.form-status',form); el.textContent = text; el.classList.toggle('success',success); }
@@ -301,10 +358,37 @@
   });
 
   for (const [side,label] of [['groom','신랑측 계좌번호'],['bride','신부측 계좌번호']]) {
-    const details=node('details');details.append(node('summary','',label));const body=node('div','account-body');const accounts=(config.accounts||[]).filter(item=>item.side===side);
-    if(!accounts.length)body.append(node('p','','계좌 정보가 아직 입력되지 않았습니다.'));
-    accounts.forEach(account=>{const row=node('div','account-row');row.append(node('p','',`${account.bank} ${account.number}`),node('p','',account.holder));const button=node('button','text-button','계좌번호 복사');button.type='button';button.addEventListener('click',()=>copy(account.number));row.append(button);body.append(row);});
-    details.append(body);$('#account-list').append(details);
+    const details=node('details');details.open=true;details.append(node('summary','',label));const body=node('div','account-body');const accounts=(config.accounts||[]).filter(item=>item.side===side && item.bank && item.number && item.holder);
+    accounts.forEach(account=>{
+      const row=node('div','account-row');
+      const person=node('p','account-person');
+      person.append(node('small','',account.role || (side==='groom'?'신랑측':'신부측')),node('strong','',account.holder));
+      const number=node('p','account-number',account.number);number.dir='ltr';
+      row.append(person,node('p','account-bank',account.bank),number);
+      const actions=node('div','account-actions');
+      const button=node('button','account-copy','계좌번호 복사');button.type='button';
+      button.setAttribute('aria-label',`${account.holder} 계좌번호 복사`);
+      let resetLabel;
+      button.addEventListener('click',async()=>{
+        if(await copy(account.number)) {
+          clearTimeout(resetLabel);button.textContent='복사했어요 ✓';
+          resetLabel=window.setTimeout(()=>{button.textContent='계좌번호 복사';},2200);
+        }
+      });
+      actions.append(button);
+      if(account.kakaoPayUrl) {
+        try {
+          const url=new URL(account.kakaoPayUrl);
+          if(url.protocol==='https:' && ['qr.kakaopay.com','link.kakaopay.com'].includes(url.hostname) && !url.username && !url.password) {
+            const pay=node('a','account-pay','카카오페이 간편송금 ↗');
+            pay.href=url.href;pay.target='_blank';pay.rel='noopener noreferrer';
+            pay.setAttribute('aria-label',`${account.holder}에게 카카오페이로 송금하기, 새 창`);actions.append(pay);
+          }
+        } catch (_) { /* An invalid optional link does not disable bank-account copying. */ }
+      }
+      row.append(actions);body.append(row);
+    });
+    details.classList.add('reveal');details.append(body);$('#account-list').append(details);
   }
   // Do not display empty bank-account placeholders to wedding guests.
   $$('#account-list details').forEach(item => { item.hidden = !$('.account-row', item); });
@@ -314,6 +398,27 @@
     const row=node('div','contact-row');const name=node('p','',contact.name);name.prepend(node('small','',contact.role));const call=node('a','','전화하기');call.href=`tel:${contact.phone.replace(/[\s-]/g,'')}`;row.append(name,call);$('#contacts').append(row);
   }
   $('#contact-open').hidden=!$('#contacts').childElementCount;
+  if (config.guestAlbumUrl) {
+    try {
+      const url = new URL(config.guestAlbumUrl);
+      if (url.protocol === 'https:' && url.hostname === 'drive.google.com' && url.pathname.startsWith('/drive/folders/') && !url.username && !url.password) $('#guest-upload').href = url.href;
+    } catch (_) { /* The restored, verified album link remains available. */ }
+  }
+  // All useful sections participate, including controls and dynamically built cards.
+  $$('.section > .map-actions, .travel-details, .calendar-button, .gallery-guide, .more-button, .guestbook-actions, .account-guide, .rsvp-card, .closing-photo, .ending > p, .ending > #share-link').forEach(el => el.classList.add('reveal'));
+  observeReveals();
+  const navLinks = $$('.quick-nav a');
+  let navFrame = 0;
+  function updateNav() {
+    navFrame = 0;
+    const current = navLinks.filter(link => $(link.hash)?.getBoundingClientRect().top <= innerHeight * .4).at(-1);
+    navLinks.forEach(link => {
+      if (link === current) link.setAttribute('aria-current','location');
+      else link.removeAttribute('aria-current');
+    });
+  }
+  window.addEventListener('scroll', () => { if (!navFrame) navFrame = requestAnimationFrame(updateNav); }, {passive:true});
+  window.addEventListener('resize', updateNav); updateNav();
   // Audit information is explicit: a class-name inference is not a verified metric match.
   window.WEDDING_DIAGNOSTICS={version:config.version,photos:photos.length,lightbox:true,rsvpAutoOpen:false,introLoop:video.loop,introGate:true,introFadeMs,representativePhoto:42,fontFamilyEvidence:'user-approved similarity palette: Gowun Dodum / Gowun Batang / Montserrat / Cormorant Garamond / Allura',fontsLoaded:false};
   if(document.fonts){Promise.all([document.fonts.load('16px "Gowun Dodum"'),document.fonts.load('16px "Gowun Batang"'),document.fonts.load('16px "Montserrat"'),document.fonts.load('16px "Cormorant Garamond"'),document.fonts.load('24px "Allura"')]).then(lists=>{window.WEDDING_DIAGNOSTICS.fontsLoaded=lists.every(list=>list.length>0);}).catch(()=>{window.WEDDING_DIAGNOSTICS.fontsLoaded=false;});}

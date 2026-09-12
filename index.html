@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="wedding-build" content="20260913-smooth-intro">
+  <meta name="wedding-build" content="20260913-garden-complete">
   <meta name="theme-color" content="#fcfaf7">
   <meta name="robots" content="noindex, nofollow">
   <title>훈백과 지우, 결혼합니다</title>
@@ -15,12 +15,13 @@
   <meta property="og:image" content="https://hunback.github.io/assets/photos/photo-42.webp">
   <meta property="og:image:alt" content="돌담 앞에서 부케를 들고 함께 웃는 훈백과 지우">
   <link id="webfonts" rel="stylesheet" href="invitation-fonts.css?v=20260911-final">
-  <link rel="stylesheet" href="styles.css?v=20260913-smooth-intro">
-  <script src="config.js?v=20260913-smooth-intro" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260913-garden-complete">
+  <script src="config.js?v=20260913-garden-complete" defer></script>
   <script src="photos.js" defer></script>
-  <script src="app.js?v=20260913-smooth-intro" defer></script>
+  <script src="app.js?v=20260913-garden-complete" defer></script>
 </head>
 <body>
+<svg class="decoration-defs" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><symbol id="garden-sprig" viewBox="0 0 120 50"><g fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"><path d="M9 37C31 40 43 31 58 16M62 16C76 31 91 40 111 37"/><path d="M25 36Q13 23 10 29Q13 38 25 36M37 32Q24 20 24 26Q27 35 37 32M47 25Q35 11 35 19Q38 28 47 25M95 36Q108 23 110 29Q107 38 95 36M83 32Q96 20 96 26Q93 35 83 32M73 25Q85 11 85 19Q82 28 73 25"/><path d="M60 25C43 14 55 6 60 13C65 6 77 14 60 25Z"/></g><circle cx="15" cy="18" r="2" fill="#cfa9b5"/><circle cx="105" cy="18" r="2" fill="#cfa9b5"/></symbol></defs></svg>
 <a class="skip-link" href="#invitation">초대의 글로 바로 가기</a>
 <section id="intro-gate" class="intro-gate" aria-label="부케를 던진 뒤 지우를 안는 훈백의 도입 영상" hidden>
   <div class="intro-stage">
@@ -34,9 +35,10 @@
 <main id="wedding" class="invitation">
   <section class="cover" aria-label="박훈백 최지우 결혼식 초대">
     <div class="cover-masthead"><span>THE WEDDING OF</span><span>HUNBAEK &amp; JIWOO</span></div>
+    <p class="cover-title" lang="en">Together, always.</p>
     <figure class="cover-hero protected-media">
       <img src="assets/photos/photo-42.webp" width="1200" height="1800" alt="돌담 앞에서 꽃다발을 들고 크게 웃는 훈백과 지우" fetchpriority="high" draggable="false">
-      <figcaption class="hero-script" lang="en">Our first page, together.</figcaption>
+      <figcaption class="hero-script" lang="en">Our kind of love.</figcaption>
     </figure>
     <div class="cover-details">
       <p class="eyebrow">WE ARE GETTING MARRIED</p>
@@ -46,8 +48,12 @@
       <a class="down-link" href="#invitation" aria-label="초대의 글로 이동">초대의 글 <span aria-hidden="true">↓</span></a>
     </div>
   </section>
+  <nav class="quick-nav" aria-label="청첩장 바로가기">
+    <a href="#location">오시는 길</a><a href="#gallery">사진</a><a href="#guestbook">방명록</a><a href="#guest-photos">업로드</a><a href="#account">마음 전하기</a><a href="#rsvp">참석</a>
+  </nav>
   <section id="invitation" class="section letter">
-    <div class="reveal"><p class="eyebrow">INVITATION</p><h2>저희 결혼합니다</h2></div>
+    <svg class="garden-sprig reveal" aria-hidden="true"><use href="#garden-sprig"/></svg>
+    <div class="reveal"><p class="eyebrow">INVITATION</p><h2>함께 맞이할,<br>우리의 모든 계절</h2></div>
     <div class="letter-copy reveal"><p>함께 보내는 날들이 좋아<br>앞으로의 날들도 함께하기로 했습니다.</p><p>12월 19일,<br>저희의 시작에 함께해 주세요.</p></div>
     <div class="family-lines reveal">
       <p>박대선 <span>·</span> 이유선 <small>의 장남</small><strong>훈백</strong></p>
@@ -60,6 +66,7 @@
     <figcaption>Every season, with you.</figcaption>
   </figure>
   <section id="ceremony" class="section ceremony">
+    <svg class="garden-sprig reveal" aria-hidden="true"><use href="#garden-sprig"/></svg>
     <div class="reveal"><p class="eyebrow">SAVE THE DATE</p><h2>우리의 약속</h2><p class="ceremony-date">2026. 12. 19. <span>토요일</span></p><p class="muted">낮 12시 30분</p></div>
     <div class="calendar reveal" role="table" aria-label="2026년 12월 달력, 19일 토요일 결혼식" id="calendar"></div>
     <div class="countdown-clock reveal" id="countdown" aria-live="off" aria-label="예식까지 남은 시간"></div>
@@ -91,23 +98,38 @@
     </div>
   </dialog>
   <section id="guestbook" class="section guestbook">
-    <div class="reveal"><p class="eyebrow">GUESTBOOK</p><h2>축하의 마음을 남겨주세요</h2><p class="section-description">소중한 마음, 오래도록 간직하겠습니다.</p></div>
+    <svg class="garden-sprig reveal" aria-hidden="true"><use href="#garden-sprig"/></svg>
+    <div class="reveal"><p class="eyebrow">GUEST BOOK</p><h2>방명록</h2><p class="section-description">두 사람에게 전하는 따뜻한 한마디.<br>소중한 마음, 오래도록 간직하겠습니다.</p></div>
+    <button class="solid-button guestbook-write reveal" id="guestbook-open" type="button">축하 글 남기기 <span aria-hidden="true">↗</span></button>
     <div id="guestbook-list" class="guestbook-list" aria-live="polite" aria-busy="true">
       <article class="guest-card empty-card"><span class="flower" aria-hidden="true">✿</span><p>축하 글을 불러오고 있습니다.</p></article>
     </div>
-    <div class="guestbook-actions"><button class="solid-button" id="guestbook-open" type="button">방명록 작성하기</button><button class="outline-button" id="guestbook-more" type="button" hidden>더보기</button></div>
+    <div class="guestbook-actions"><button class="outline-button" id="guestbook-more" type="button" hidden>이전 축하 글 더보기</button><button class="text-button" id="guestbook-retry" type="button" hidden>방명록 다시 불러오기</button></div>
     <p id="connection-status" class="connection-status" role="status"></p>
   </section>
+  <section id="guest-photos" class="section guest-photos">
+    <div class="reveal"><p class="eyebrow">THROUGH YOUR EYES</p><h2>여러분이 담은<br>우리의 하루</h2><p class="section-description">웃음도, 눈물도, 놓치고 싶지 않은 순간도.<br>여러분의 시선으로 담은 사진과 영상을<br>저희에게 선물해 주세요.</p></div>
+    <div class="album-art reveal" aria-hidden="true">
+      <figure><img src="assets/photos/photo-42-small.webp" width="560" height="840" alt="" loading="lazy" draggable="false"><figcaption>with you</figcaption></figure>
+      <figure><img src="assets/photos/photo-13-small.webp" width="560" height="373" alt="" loading="lazy" draggable="false"><figcaption>our happy day</figcaption></figure>
+      <span class="album-heart">♡</span>
+    </div>
+    <a id="guest-upload" class="solid-button guest-upload-button reveal" href="https://drive.google.com/drive/folders/1uEmtC8PYTgQWiYc3uCr3EP_xjxRAnGC-" target="_blank" rel="noopener noreferrer">사진 · 영상 올리기 <span aria-hidden="true">↗</span></a>
+    <p class="upload-note reveal">Google 로그인 후 올릴 수 있어요.<br>올린 파일은 링크를 가진 다른 하객도 볼 수 있는 공유 앨범입니다.</p>
+    <details class="upload-help reveal"><summary>사진·영상 올리는 방법</summary><ol><li>위 버튼으로 하객 앨범을 열어 주세요.</li><li>Google 로그인 후 <strong>‘+’ 또는 ‘신규 → 파일 업로드’</strong>를 선택해 주세요.</li><li>사진이나 영상을 고르고 업로드가 끝날 때까지 기다려 주세요.</li></ol><p>휴대폰에서 업로드 메뉴가 보이지 않으면 Google Drive 앱에서 앨범을 열어 주세요.</p></details>
+  </section>
   <section id="account" class="section account">
+    <svg class="garden-sprig reveal" aria-hidden="true"><use href="#garden-sprig"/></svg>
     <div class="reveal"><p class="eyebrow">WITH LOVE</p><h2>마음 전하실 곳</h2><p class="section-description">축하해 주시는 따뜻한 마음에<br>진심으로 감사드립니다.</p></div>
     <div id="account-list" class="account-list"></div>
+    <p class="account-guide">계좌번호를 복사해 이용하시는 은행 앱에서<br>마음을 전하실 수 있습니다.</p>
   </section>
   <section id="rsvp" class="section rsvp">
     <!-- RSVP is deliberately static. Only this explicit button opens the form. -->
     <div class="rsvp-card"><p class="eyebrow">R.S.V.P.</p><h2>함께해 주실 수 있나요?</h2><p>편안한 자리를 준비할 수 있도록<br>참석 의사를 전해 주세요.</p><button class="solid-button" id="rsvp-open" type="button">참석 의사 전달하기</button><p class="optional-note">참석 의사 전달은 선택 사항입니다.</p></div>
   </section>
   <figure class="closing-photo protected-media"><img src="assets/photos/photo-13.webp" width="2000" height="1333" alt="손을 잡고 나란히 걷는 두 사람의 흑백 사진" loading="lazy" decoding="async" draggable="false"></figure>
-  <footer class="ending"><p class="eyebrow">THANK YOU FOR BEING WITH US</p><p>우리의 시작을 함께해 주셔서 감사합니다.</p><p class="closing-script" lang="en">With love, always.</p><p class="ending-names">훈백 <span aria-hidden="true">·</span> 지우</p><button class="text-button" id="share-link" type="button">청첩장 링크 복사</button><p class="local-status" id="local-status" hidden>로컬 미리보기 · 실제 사이트 미반영</p></footer>
+  <footer class="ending"><p class="eyebrow">THANK YOU FOR BEING WITH US</p><p>우리의 시작을 함께해 주셔서 감사합니다.</p><p class="closing-script" lang="en">With love, always.</p><p class="ending-names">훈백 <span aria-hidden="true">·</span> 지우</p><button class="text-button" id="share-link" type="button">청첩장 링크 복사</button><button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false" hidden>움직임 줄이기</button><p class="local-status" id="local-status" hidden>로컬 미리보기 · 실제 사이트 미반영</p></footer>
 </main>
 <dialog id="guestbook-dialog" class="form-dialog" aria-labelledby="guestbook-title">
   <header class="dialog-header"><h2 id="guestbook-title">방명록 작성하기</h2><button type="button" class="dialog-close" data-close aria-label="방명록 작성 닫기">×</button></header>
