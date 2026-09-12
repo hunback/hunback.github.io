@@ -1,6 +1,6 @@
 /* Public configuration. Never put an API secret, administrator token, or guest data here. */
 window.WEDDING_CONFIG = {
-  version: 'mobile-20260912-published',
+  version: 'mobile-20260913-smooth-intro',
   canonicalUrl: 'https://hunback.github.io/',
   // Local work uses local SQLite; the public invitation uses the hosted D1 API.
   apiBase: ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)

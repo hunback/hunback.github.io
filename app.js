@@ -79,24 +79,71 @@
   $('#guestbook-open').addEventListener('click', () => openDialog('#guestbook-dialog'));
   $('#contact-open').addEventListener('click', () => openDialog('#contact-dialog'));
 
-  // A single, required opening sequence: 1.5s fade-in, one video pass, then 1.5s fade-out to the hero image.
+  // Keep the filmed bouquet-to-bridal-carry sequence. Fade the media in and the
+  // outer gate out separately so an animation fill cannot override the exit.
   const video = $('#intro-video'); const introGate = $('#intro-gate'); const retry = $('#intro-retry');
-  function finishIntro() {
-    let finished = false;
-    const removeGate = () => { if (finished) return; finished = true; introGate.hidden = true; document.body.classList.remove('intro-active'); };
+  const main = $('#wedding'); const introSkip = $('#intro-skip');
+  const introFadeMs = 1500;
+  let introFinished = false; let introReady = false; let playTimer; let loadingTimer; let stallTimer;
+  function finishIntro(immediate = false) {
+    if (introFinished) return;
+    introFinished = true;
+    clearTimeout(playTimer); clearTimeout(loadingTimer); clearTimeout(stallTimer);
+    video.pause();
+    const restoreFocus = introGate.contains(document.activeElement);
+    retry.hidden = true;
+    document.body.classList.add('intro-complete');
+    let gateRemoved = false;
+    const removeGate = () => {
+      if (gateRemoved) return;
+      gateRemoved = true;
+      introGate.hidden = true;
+      document.body.classList.remove('intro-active');
+      main.inert = false;
+      if (restoreFocus) $('.down-link').focus({ preventScroll: true });
+    };
+    if (immediate) { removeGate(); return; }
     introGate.classList.add('is-leaving');
-    introGate.addEventListener('transitionend', event => { if (event.target === introGate) removeGate(); }, { once: true });
-    window.setTimeout(removeGate, 1550); // Also completes when reduced-motion disables CSS transitions.
+    introGate.addEventListener('transitionend', event => {
+      if (event.target === introGate && event.propertyName === 'opacity') removeGate();
+    });
+    window.setTimeout(removeGate, introFadeMs + 80);
   }
   async function playIntro() {
+    if (introFinished) return;
     retry.hidden = true;
-    try { video.currentTime = 0; await video.play(); }
-    catch (_) { retry.hidden = false; }
+    try { await video.play(); if (introFinished) video.pause(); }
+    catch (_) { if (!introFinished) retry.hidden = false; }
   }
-  video.addEventListener('ended', finishIntro);
-  video.addEventListener('error', () => { retry.hidden = false; });
+  function readyIntro() {
+    if (introReady || introFinished) return;
+    introReady = true;
+    clearTimeout(loadingTimer);
+    introGate.classList.add('is-ready');
+    playTimer = window.setTimeout(playIntro, introFadeMs);
+  }
+  video.addEventListener('loadeddata', readyIntro, { once: true });
+  video.addEventListener('ended', () => finishIntro());
+  video.addEventListener('error', () => finishIntro());
+  // A failed download must never leave guests trapped behind the opening.
+  $('source', video).addEventListener('error', () => finishIntro());
+  video.addEventListener('waiting', () => {
+    clearTimeout(stallTimer);
+    stallTimer = window.setTimeout(() => finishIntro(), 8000);
+  });
+  video.addEventListener('playing', () => clearTimeout(stallTimer));
   retry.addEventListener('click', playIntro);
-  window.setTimeout(playIntro, 1500);
+  introSkip.addEventListener('click', () => finishIntro());
+  // Reduced motion disables the cover's zoom/slide; opacity fades preserve the
+  // requested filmed opening without introducing additional spatial motion.
+  if (location.hash) finishIntro(true);
+  else {
+    introGate.hidden = false;
+    document.body.classList.add('intro-active');
+    main.inert = true;
+    loadingTimer = window.setTimeout(() => finishIntro(), 8000);
+    if (video.readyState >= 2) readyIntro();
+  }
 
   // Block image UI enlargement, not text accessibility zoom or normal vertical scrolling.
   document.addEventListener('dblclick', event => { if (event.target.closest('.protected-media')) event.preventDefault(); });
@@ -268,6 +315,6 @@
   }
   $('#contact-open').hidden=!$('#contacts').childElementCount;
   // Audit information is explicit: a class-name inference is not a verified metric match.
-  window.WEDDING_DIAGNOSTICS={version:config.version,photos:photos.length,lightbox:true,rsvpAutoOpen:false,introLoop:video.loop,introGate:true,introFadeMs:1500,fontFamilyEvidence:'user-approved similarity palette: Gowun Dodum / Gowun Batang / Montserrat / Cormorant Garamond / Allura',fontsLoaded:false};
+  window.WEDDING_DIAGNOSTICS={version:config.version,photos:photos.length,lightbox:true,rsvpAutoOpen:false,introLoop:video.loop,introGate:true,introFadeMs,representativePhoto:42,fontFamilyEvidence:'user-approved similarity palette: Gowun Dodum / Gowun Batang / Montserrat / Cormorant Garamond / Allura',fontsLoaded:false};
   if(document.fonts){Promise.all([document.fonts.load('16px "Gowun Dodum"'),document.fonts.load('16px "Gowun Batang"'),document.fonts.load('16px "Montserrat"'),document.fonts.load('16px "Cormorant Garamond"'),document.fonts.load('24px "Allura"')]).then(lists=>{window.WEDDING_DIAGNOSTICS.fontsLoaded=lists.every(list=>list.length>0);}).catch(()=>{window.WEDDING_DIAGNOSTICS.fontsLoaded=false;});}
 })();
