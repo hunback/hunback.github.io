@@ -1,6 +1,9 @@
 'use strict';
 (() => {
   const config = window.WEDDING_CONFIG || {};
+  // Local previews must stay off the production D1 endpoint. Exported pages keep the verified API.
+  const localPreview = location.protocol === 'file:' || ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname) || window.WEDDING_OFFLINE_PREVIEW === true;
+  if (localPreview) config.apiBase = '';
   const photos = window.WEDDING_PHOTOS || [];
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -87,30 +90,30 @@
   $('#guestbook-open').addEventListener('click', () => openDialog('#guestbook-dialog'));
   $('#contact-open').addEventListener('click', () => openDialog('#contact-dialog'));
 
-  // Keep the filmed bouquet-to-bridal-carry sequence. Fade the media in and the
-  // outer gate out separately so an animation fill cannot override the exit.
+  // The supplied couple film runs once, then fades into the handwritten cover.
   const video = $('#intro-video'); const introGate = $('#intro-gate'); const retry = $('#intro-retry');
   const main = $('#wedding'); const introSkip = $('#intro-skip');
+  const media = window.WEDDING_MEDIA || window.DESIGN_CONTENT?.media || {};
   const introFadeMs = 1500;
   let introFinished = false; let introReady = false; let playTimer; let loadingTimer; let stallTimer;
   function finishIntro(immediate = false) {
     if (introFinished) return;
     introFinished = true;
     clearTimeout(playTimer); clearTimeout(loadingTimer); clearTimeout(stallTimer);
-    video.pause();
-    const restoreFocus = introGate.contains(document.activeElement);
-    retry.hidden = true;
+    video?.pause();
+    const restoreFocus = Boolean(introGate?.contains(document.activeElement));
+    if (retry) retry.hidden = true;
     document.body.classList.add('intro-complete');
     let gateRemoved = false;
     const removeGate = () => {
       if (gateRemoved) return;
       gateRemoved = true;
-      introGate.hidden = true;
+      if (introGate) introGate.hidden = true;
       document.body.classList.remove('intro-active');
-      main.inert = false;
-      if (restoreFocus) $('.down-link').focus({ preventScroll: true });
+      if (main) main.inert = false;
+      if (restoreFocus) $('.down-link')?.focus({ preventScroll: true });
     };
-    if (immediate) { removeGate(); return; }
+    if (immediate || !introGate) { removeGate(); return; }
     introGate.classList.add('is-leaving');
     introGate.addEventListener('transitionend', event => {
       if (event.target === introGate && event.propertyName === 'opacity') removeGate();
@@ -118,40 +121,50 @@
     window.setTimeout(removeGate, introFadeMs + 80);
   }
   async function playIntro() {
-    if (introFinished) return;
-    retry.hidden = true;
+    if (introFinished || !video) return;
+    if (retry) retry.hidden = true;
     try { await video.play(); if (introFinished) video.pause(); }
-    catch (_) { if (!introFinished) retry.hidden = false; }
+    catch (_) { if (!introFinished && retry) retry.hidden = false; }
   }
   function readyIntro() {
-    if (introReady || introFinished) return;
+    if (introReady || introFinished || !video || !introGate) return;
     introReady = true;
     clearTimeout(loadingTimer);
     introGate.classList.add('is-ready');
-    playTimer = window.setTimeout(playIntro, introFadeMs);
+    if (reduced.matches) finishIntro(true);
+    else playTimer = window.setTimeout(playIntro, introFadeMs);
   }
-  video.addEventListener('loadeddata', readyIntro, { once: true });
-  video.addEventListener('ended', () => finishIntro());
-  video.addEventListener('error', () => finishIntro());
-  // A failed download must never leave guests trapped behind the opening.
-  $('source', video).addEventListener('error', () => finishIntro());
-  video.addEventListener('waiting', () => {
-    clearTimeout(stallTimer);
-    stallTimer = window.setTimeout(() => finishIntro(), 8000);
-  });
-  video.addEventListener('playing', () => clearTimeout(stallTimer));
-  retry.addEventListener('click', playIntro);
-  introSkip.addEventListener('click', () => finishIntro());
-  // Reduced motion disables the cover's zoom/slide; opacity fades preserve the
-  // requested filmed opening without introducing additional spatial motion.
-  if (location.hash) finishIntro(true);
-  else {
-    introGate.hidden = false;
-    document.body.classList.add('intro-active');
-    main.inert = true;
-    loadingTimer = window.setTimeout(() => finishIntro(), 8000);
-    if (video.readyState >= 2) readyIntro();
+  if (video) {
+    video.muted = true;
+    video.playsInline = true;
+    video.autoplay = media?.introEnabled !== false && !reduced.matches && !location.hash;
+    if (!video.autoplay) video.removeAttribute('autoplay');
+    video.loop = false;
+    video.addEventListener('loadeddata', readyIntro, { once: true });
+    video.addEventListener('ended', () => finishIntro());
+    video.addEventListener('error', () => finishIntro());
+    // A failed download must never leave guests trapped behind the opening.
+    $('source', video)?.addEventListener('error', () => finishIntro());
+    video.addEventListener('waiting', () => {
+      clearTimeout(stallTimer);
+      stallTimer = window.setTimeout(() => finishIntro(), 8000);
+    });
+    video.addEventListener('playing', () => clearTimeout(stallTimer));
   }
+  retry?.addEventListener('click', playIntro);
+  introSkip?.addEventListener('click', () => finishIntro());
+  reduced.addEventListener?.('change', event => { if (event.matches) finishIntro(true); });
+  if (!media || media.introEnabled !== false) {
+    if (!video || !introGate || !main || location.hash || reduced.matches) finishIntro(true);
+    else {
+      introGate.hidden = false;
+      document.body.classList.add('intro-active');
+      main.inert = true;
+      loadingTimer = window.setTimeout(() => finishIntro(), 8000);
+      if (video.readyState >= 2) readyIntro();
+      if (video.ended) finishIntro();
+    }
+  } else finishIntro(true);
 
   // Block image UI enlargement, not text accessibility zoom or normal vertical scrolling.
   document.addEventListener('dblclick', event => { if (event.target.closest('.protected-media')) event.preventDefault(); });
@@ -231,9 +244,13 @@
     const stem = `assets/photos/photo-${String(photo.id).padStart(2,'0')}`;
     const image = $('#photo-dialog-image');
     image.src = asset(`${stem}.webp`); image.alt = photo.alt;
-    $('#photo-dialog-caption').textContent = photo.group;
+    $('#photo-dialog-caption').textContent = photo.alt;
     $('#photo-dialog').showModal();
   }
+
+  const ceremonyPhoto = $('#ceremony-photo');
+  const scarfPhoto = photos.find(photo => photo.id === 3);
+  if (ceremonyPhoto && scarfPhoto) ceremonyPhoto.addEventListener('click', () => openPhoto(scarfPhoto));
 
   function renderMorePhotos() {
     const end = Math.min(state.galleryCount + (state.galleryCount ? 8 : 6), photos.length); const grid = $('#gallery-grid');
@@ -247,7 +264,7 @@
       button.setAttribute('aria-label', `${photo.alt} 크게 보기`);
       const img = node('img'); const stem = `assets/photos/photo-${String(photo.id).padStart(2,'0')}`; img.src = asset(`${stem}-small.webp`);
       if (!window.WEDDING_ASSET_MAP) img.srcset = `${stem}-small.webp 560w, ${stem}.webp 1200w`;
-      img.sizes = groupStart || photo.width > photo.height ? '(max-width: 430px) 92vw, 396px' : '(max-width: 430px) 44vw, 194px';
+      img.sizes = '(max-width: 430px) calc((100vw - 44px) / 2), 194px';
       img.alt = photo.alt; img.width = photo.width; img.height = photo.height; img.loading = 'lazy'; img.decoding = 'async'; img.draggable = false;
       button.append(img); button.addEventListener('click', () => openPhoto(photo)); figure.append(button); grid.append(figure);
     }
@@ -258,26 +275,17 @@
   $('#gallery-more').addEventListener('click', renderMorePhotos); renderMorePhotos();
 
   function renderEmpty(message) {
-    const card = node('article', 'guest-card empty-card reveal'); const flower = flowerIcon();
-    card.append(flower, node('p', '', message)); $('#guestbook-list').replaceChildren(card); $('#guestbook-list').setAttribute('aria-busy', 'false');
+    const card = node('article', 'guest-card empty-card reveal');
+    card.append(node('p', '', message)); $('#guestbook-list').replaceChildren(card); $('#guestbook-list').setAttribute('aria-busy', 'false');
     observeReveals(card);
-  }
-  function flowerIcon() {
-    const span = node('span', 'flower'); span.setAttribute('aria-hidden','true');
-    const NS='http://www.w3.org/2000/svg'; const svg=document.createElementNS(NS,'svg');
-    svg.setAttribute('viewBox','0 0 32 32');
-    for(let i=0;i<5;i++) { const c=document.createElementNS(NS,'circle'); const a=(i*72-90)*Math.PI/180;
-      c.setAttribute('cx',String(16+6*Math.cos(a))); c.setAttribute('cy',String(16+6*Math.sin(a))); c.setAttribute('r','6.3'); c.setAttribute('fill','#92759f'); svg.append(c); }
-    const dot=document.createElementNS(NS,'circle'); dot.setAttribute('cx','16');dot.setAttribute('cy','16');dot.setAttribute('r','2.5');dot.setAttribute('fill','#fcfaf7');svg.append(dot);span.append(svg);return span;
   }
   function guestCard(entry) {
     const card = node('article', 'guest-card reveal'); card.dataset.id = entry.id;
-    const flower = flowerIcon();
     const remove = node('button', 'guest-delete', '×'); remove.type = 'button'; remove.setAttribute('aria-label', `${entry.name}님의 방명록 삭제`);
     remove.addEventListener('click', () => { state.deleteId = entry.id; $('#delete-form').reset(); openDialog('#delete-dialog'); });
     const author = node('p', 'guest-author', `From. ${entry.name}`);
     const date = new Date(entry.createdAt); const formatted = Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString('ko-KR', {timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'});
-    author.append(node('span', 'guest-date', formatted)); card.append(remove, flower, node('p','guest-message',entry.message), author); return card;
+    author.append(node('span', 'guest-date', formatted)); card.append(remove, node('p','guest-message',entry.message), author); return card;
   }
   async function loadGuests(append = false) {
     const list = $('#guestbook-list'); list.setAttribute('aria-busy', 'true');
@@ -420,6 +428,6 @@
   window.addEventListener('scroll', () => { if (!navFrame) navFrame = requestAnimationFrame(updateNav); }, {passive:true});
   window.addEventListener('resize', updateNav); updateNav();
   // Audit information is explicit: a class-name inference is not a verified metric match.
-  window.WEDDING_DIAGNOSTICS={version:config.version,photos:photos.length,lightbox:true,rsvpAutoOpen:false,introLoop:video.loop,introGate:true,introFadeMs,representativePhoto:42,fontFamilyEvidence:'user-approved similarity palette: Gowun Dodum / Gowun Batang / Montserrat / Cormorant Garamond / Allura',fontsLoaded:false};
-  if(document.fonts){Promise.all([document.fonts.load('16px "Gowun Dodum"'),document.fonts.load('16px "Gowun Batang"'),document.fonts.load('16px "Montserrat"'),document.fonts.load('16px "Cormorant Garamond"'),document.fonts.load('24px "Allura"')]).then(lists=>{window.WEDDING_DIAGNOSTICS.fontsLoaded=lists.every(list=>list.length>0);}).catch(()=>{window.WEDDING_DIAGNOSTICS.fontsLoaded=false;});}
+  window.WEDDING_DIAGNOSTICS={version:config.version,photos:photos.length,lightbox:true,rsvpAutoOpen:false,introLoop:video?.loop ?? false,introGate:Boolean(introGate),introEnabled:media?.introEnabled !== false,introFadeMs,representativePhoto:42,fontFamilyEvidence:'Caveat / Gowun Dodum / Cormorant Garamond',fontsLoaded:false};
+  if(document.fonts){Promise.all([document.fonts.load('16px "Gowun Dodum"'),document.fonts.load('16px "Gowun Batang"'),document.fonts.load('16px "Montserrat"'),document.fonts.load('16px "Cormorant Garamond"'),document.fonts.load('28px "Caveat"')]).then(lists=>{window.WEDDING_DIAGNOSTICS.fontsLoaded=lists.every(list=>list.length>0);}).catch(()=>{window.WEDDING_DIAGNOSTICS.fontsLoaded=false;});}
 })();

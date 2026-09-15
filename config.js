@@ -3,7 +3,7 @@ window.WEDDING_CONFIG = {
   version: 'mobile-20260913-garden-complete',
   canonicalUrl: 'https://hunback.github.io/',
   // Local work uses local SQLite; the public invitation uses the hosted D1 API.
-  apiBase: ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)
+  apiBase: (['localhost', '127.0.0.1', '[::1]'].includes(location.hostname) || /^(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname))
     ? '' : 'https://hunback-wedding-api.hunback2315.workers.dev',
   weddingDate: '2026-12-19T12:30:00+09:00',
   address: '경기 고양시 일산동구 강석로 9',
