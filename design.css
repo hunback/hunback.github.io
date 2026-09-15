@@ -116,7 +116,9 @@ body.intro-complete .hero-drawing-heart { animation: draw-line 700ms var(--mobil
 .calendar span { min-height: 35px; color: var(--mobile-ink); font-family: Montserrat, sans-serif; font-size: 12px; }
 .calendar .weekday { color: var(--mobile-muted); font-family: var(--mobile-body); font-size: 10px; }
 .calendar .sunday { color: var(--mobile-lavender); }
-.calendar .wedding-day { width: 31px; min-height: 31px; border: 1px solid var(--mobile-lavender); border-radius: 50%; background: var(--mobile-lavender); color: #fff; }
+.calendar .wedding-day { width: 42px; min-height: 38px; position: relative; display: grid; place-items: center; border: 0; border-radius: 0; background: transparent; color: var(--mobile-lavender); }
+.calendar .wedding-day .calendar-heart { position: absolute; inset: 0; display: grid; place-items: center; font-family: Georgia, serif; font-size: 40px; line-height: 1; font-weight: 400; }
+.calendar .wedding-day .calendar-number { position: relative; z-index: 1; margin-top: 1px; font-family: var(--mobile-display); font-size: 11px; line-height: 1; color: var(--mobile-lavender); }
 .countdown-clock { min-height: 68px; margin: 30px auto 24px; gap: 8px; color: var(--mobile-ink); }
 .clock-unit { min-width: 42px; }
 .clock-unit small { color: var(--mobile-muted); font-size: 7px; letter-spacing: .1em; }

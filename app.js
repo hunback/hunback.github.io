@@ -221,7 +221,10 @@
   const first = new Date(Date.UTC(2026, 11, 1)).getUTCDay();
   for (let cell = 0; cell < 35; cell++) {
     const date = cell - first + 1; const valid = date >= 1 && date <= 31;
-    const el = node('span', `${cell % 7 === 0 ? 'sunday' : ''} ${date === 19 ? 'wedding-day' : ''}`, valid ? String(date) : ''); el.setAttribute('role', 'cell');
+    const el = node('span', `${cell % 7 === 0 ? 'sunday' : ''} ${date === 19 ? 'wedding-day' : ''}`, date === 19 ? '' : (valid ? String(date) : '')); el.setAttribute('role', 'cell');
+    if (date === 19) {
+      el.append(node('span', 'calendar-heart', '♡'), node('span', 'calendar-number', String(date)));
+    }
     if (date === 19) el.setAttribute('aria-label', '12월 19일 토요일, 결혼식'); calendar.append(el);
   }
   function updateCountdown() {
