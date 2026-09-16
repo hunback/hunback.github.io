@@ -194,6 +194,12 @@ body.intro-complete .hero-drawing-heart { animation: draw-line 700ms var(--mobil
 .album-art figure + figure { top: 38px; right: 8px; left: auto; transform: rotate(5deg); }
 .album-art img { width: 100%; height: 132px; object-fit: cover; }
 .guest-upload-button { width: 100%; }
+.direct-upload[hidden] { display: none; }
+.direct-upload { display: grid; gap: 10px; }
+.direct-upload input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.direct-upload .solid-button { cursor: pointer; }
+.direct-upload .outline-button:disabled { opacity: .55; cursor: default; }
+.direct-upload .upload-note { margin: 0; line-height: 1.6; text-align: center; }
 .upload-note, .upload-help, .upload-help ol, .upload-help p { color: var(--mobile-muted); }
 .upload-help { margin-top: 27px; border-top: 1px solid var(--mobile-line); border-bottom: 1px solid var(--mobile-line); text-align: left; font-size: 12px; }
 .upload-help summary { padding: 16px 0; list-style: none; cursor: pointer; }

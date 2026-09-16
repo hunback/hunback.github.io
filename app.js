@@ -317,6 +317,10 @@
       if (health.ok !== true || !['local-preview','production'].includes(health.mode)) throw new Error('지원하지 않는 접수 서버입니다.');
       state.api = true; state.mode = health.mode;
       state.passwordProtocol = health.passwordProtocol || '';
+      if (health.photoUpload === true) {
+        $('#direct-upload').hidden = false;
+        $('#guest-drive-fallback').hidden = true;
+      }
       if (health.mode === 'local-preview') { $('#connection-status').textContent = '로컬 미리보기 · 이 컴퓨터의 테스트 기록만 표시됩니다.'; $('#local-status').hidden = false; }
       await loadGuests();
     } catch (_) {
@@ -415,6 +419,47 @@
       if (url.protocol === 'https:' && url.hostname === 'drive.google.com' && url.pathname.startsWith('/drive/folders/') && !url.username && !url.password) $('#guest-upload').href = url.href;
     } catch (_) { /* The restored, verified album link remains available. */ }
   }
+  const guestFiles = $('#guest-files'), guestSend = $('#guest-send');
+  const uploadTypes = {'heic':'image/heic','heif':'image/heif','mov':'video/quicktime','jpg':'image/jpeg','jpeg':'image/jpeg','png':'image/png','webp':'image/webp','mp4':'video/mp4'};
+  function selectedType(file) { return file.type || uploadTypes[file.name.split('.').at(-1).toLowerCase()] || ''; }
+  guestFiles.addEventListener('change', () => {
+    const files = [...guestFiles.files];
+    $('#upload-selection').textContent = files.length ? `${files.length}개 선택 · ${files.map(file => file.name).join(', ')}` : '사진·영상을 선택해 주세요. 한 번에 5개까지 올릴 수 있습니다.';
+    $('#upload-status').textContent = '';
+    guestSend.disabled = !files.length || files.length > 5;
+    if (files.length > 5) $('#upload-status').textContent = '한 번에 5개까지만 선택해 주세요.';
+  });
+  guestSend.addEventListener('click', async () => {
+    if (!state.api || ![...guestFiles.files].length) return;
+    const files = [...guestFiles.files];
+    if (files.length > 5) return;
+    guestSend.disabled = true;
+    let sent = 0;
+    for (const file of files) {
+      const type = selectedType(file);
+      const max = type.startsWith('video/') ? 50 * 1024 * 1024 : 20 * 1024 * 1024;
+      if (!type || !['image/jpeg','image/png','image/webp','image/heic','image/heif','video/mp4','video/quicktime'].includes(type) || file.size < 12 || file.size > max) {
+        $('#upload-status').textContent = `${file.name}: 사진은 20MB, 영상은 50MB 이하의 JPG·PNG·WebP·HEIC·MP4·MOV 파일을 선택해 주세요.`;
+        break;
+      }
+      $('#upload-status').textContent = `${sent + 1}/${files.length} 업로드 중 · ${file.name}`;
+      const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 120000);
+      try {
+        const response = await fetch(`${apiBase}/api/photos`, {method:'POST',body:file,headers:{'Content-Type':type,'Accept':'application/json'},credentials:'omit',cache:'no-store',signal:controller.signal});
+        const result = await response.json();
+        if (!response.ok || result.ok !== true) throw new Error(result.error || '파일을 전달하지 못했습니다.');
+        sent++;
+      } catch(error) {
+        $('#upload-status').textContent = `${sent}개 완료 · ${file.name} 전송 상태를 확인하지 못했습니다. 잠시 뒤 다시 시도해 주세요.`;
+        break;
+      } finally { clearTimeout(timer); }
+    }
+    if (sent === files.length) {
+      $('#upload-status').textContent = state.mode === 'local-preview' ? `${sent}개를 이 컴퓨터의 테스트 폴더에 저장했습니다.` : `${sent}개를 두 사람에게 전달했습니다. 고맙습니다.`;
+      guestFiles.value = '';
+      $('#upload-selection').textContent = '사진·영상을 선택해 주세요. 한 번에 5개까지 올릴 수 있습니다.';
+    } else guestSend.disabled = false;
+  });
   // All useful sections participate, including controls and dynamically built cards.
   $$('.section > .map-actions, .travel-details, .calendar-button, .gallery-guide, .more-button, .guestbook-actions, .account-guide, .rsvp-card, .closing-photo, .ending > p, .ending > #share-link').forEach(el => el.classList.add('reveal'));
   observeReveals();

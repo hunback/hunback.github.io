@@ -4,16 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="wedding-build" content="20260914-video-intro-v1">
-  <meta name="theme-color" content="#FAF7F0">
+  <meta name="theme-color" content="#F1F0EE">
   <meta name="robots" content="noindex, nofollow">
-  <title>박훈백과 최지우, 결혼합니다</title>
-  <meta name="description" content="2026-12-19 12:30 · 더테라스웨딩 11층 더테라스 홀. 소중한 여러분을 초대합니다.">
-  <meta property="og:title" content="박훈백과 최지우, 결혼합니다">
-  <meta property="og:description" content="2026-12-19 12:30 · 더테라스웨딩 11층 더테라스 홀. 소중한 여러분을 초대합니다.">
+  <title>훈백과 지우, 결혼합니다</title>
+  <meta name="description" content="2026년 12월 19일 토요일 낮 12시 30분 · 더테라스웨딩">
+  <meta property="og:title" content="훈백과 지우, 결혼합니다">
+  <meta property="og:description" content="2026년 12월 19일 토요일 낮 12시 30분 · 더테라스웨딩">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://hunback.github.io/">
   <meta property="og:image" content="https://hunback.github.io/assets/photos/selected-01.webp">
-  <meta property="og:image:alt" content="숲길에서 베일을 펼쳐 든 두 사람">
+  <meta property="og:image:alt" content="돌담 앞에서 꽃다발을 들고 웃는 두 사람">
   <link id="webfonts" rel="stylesheet" href="invitation-fonts.css?v=20260914-video-intro-v1">
   <link rel="stylesheet" href="styles.css?v=20260913-garden-complete">
   <link rel="stylesheet" href="design.css?v=20260916-final3">
@@ -24,7 +24,6 @@
   <script src="app.js?v=20260916-calendar" defer></script>
   <script src="design-audio.js?v=20260914-audio" defer></script>
   <script src="naver-map.js?v=20260914" defer></script>
-<link rel="canonical" href="https://hunback.github.io/">
 </head>
 <body>
 <a class="skip-link" href="#invitation">초대의 글로 바로 가기</a>
@@ -199,9 +198,19 @@
       <figure><img id="mobile-album-left-image" src="assets/photos/selected-03-small.webp" width="560" height="840" alt="" loading="lazy" draggable="false"></figure>
       <figure><img id="mobile-album-right-image" src="assets/photos/selected-05-small.webp" width="560" height="840" alt="" loading="lazy" draggable="false"></figure>
     </div>
-    <a id="guest-upload" class="solid-button guest-upload-button reveal" href="https://drive.google.com/drive/folders/1uEmtC8PYTgQWiYc3uCr3EP_xjxRAnGC-" target="_blank" rel="noopener noreferrer">사진 · 영상 올리기 <span aria-hidden="true">↗</span></a>
-    <p class="upload-note reveal">Google 로그인 후 올릴 수 있어요.<br>올린 파일은 링크를 가진 다른 하객도 볼 수 있는 공유 앨범입니다.</p>
-    <details class="upload-help reveal"><summary>사진·영상 올리는 방법</summary><ol><li>위 버튼으로 하객 앨범을 열어 주세요.</li><li>Google 로그인 후 <strong>‘+’ 또는 ‘신규 → 파일 업로드’</strong>를 선택해 주세요.</li><li>사진이나 영상을 고르고 업로드가 끝날 때까지 기다려 주세요.</li></ol><p>휴대폰에서 업로드 메뉴가 보이지 않으면 Google Drive 앱에서 앨범을 열어 주세요.</p></details>
+    <div id="direct-upload" class="direct-upload" hidden>
+      <label for="guest-files" class="solid-button guest-upload-button">사진 · 영상 선택</label>
+      <input id="guest-files" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime" multiple>
+      <p id="upload-selection" class="upload-note">사진·영상을 선택해 주세요. 한 번에 5개까지 올릴 수 있습니다.</p>
+      <button id="guest-send" class="outline-button guest-upload-button" type="button" disabled>선택한 파일 올리기</button>
+      <p id="upload-status" class="upload-note" role="status" aria-live="polite"></p>
+      <p class="upload-note">사진 20MB·영상 50MB 이하. 두 사람에게 비공개로 전달됩니다.</p>
+    </div>
+    <div id="guest-drive-fallback">
+      <a id="guest-upload" class="solid-button guest-upload-button reveal" href="https://drive.google.com/drive/folders/1uEmtC8PYTgQWiYc3uCr3EP_xjxRAnGC-" target="_blank" rel="noopener noreferrer">사진 · 영상 올리기 <span aria-hidden="true">↗</span></a>
+      <p class="upload-note reveal">Google 로그인 후 올릴 수 있어요.<br>올린 파일은 링크를 가진 다른 하객도 볼 수 있는 공유 앨범입니다.</p>
+      <details class="upload-help reveal"><summary>사진·영상 올리는 방법</summary><ol><li>위 버튼으로 하객 앨범을 열어 주세요.</li><li>Google 로그인 후 <strong>‘+’ 또는 ‘신규 → 파일 업로드’</strong>를 선택해 주세요.</li><li>사진이나 영상을 고르고 업로드가 끝날 때까지 기다려 주세요.</li></ol><p>휴대폰에서 업로드 메뉴가 보이지 않으면 Google Drive 앱에서 앨범을 열어 주세요.</p></details>
+    </div>
   </section>
 
   <figure id="closing-photo" class="closing-photo protected-media reveal"><img src="assets/photos/selected-33.webp" width="1800" height="1200" alt="벽돌 길을 함께 걷는 두 사람의 흑백 사진" loading="lazy" decoding="async" draggable="false"></figure>
