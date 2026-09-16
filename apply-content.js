@@ -125,7 +125,7 @@
     if ('MutationObserver' in window) new MutationObserver(applyGalleryPositions).observe(gallery, { childList: true, subtree: true });
   }
 
-  function applyPhoto(selector, photo, fixedId) {
+  function applyPhoto(selector, photo) {
     const image = $(selector);
     const value = object(photo);
     if (!image || !text(value.path)) return;
@@ -136,9 +136,6 @@
     const alt = text(value.alt) || text(value.label);
     if (alt) image.alt = alt;
     setPosition(image, value.position);
-    if (fixedId !== undefined && fullAssetPath(value.path, source) !== `assets/photos/photo-${String(fixedId).padStart(2, '0')}.webp`) {
-      mapPhotoAsset(fixedId, value.path, value.position);
-    }
   }
 
   function applyGalleryContent(entries) {
@@ -229,66 +226,6 @@
     return `${Number(match[2])}월 ${Number(match[3])}일 ${weekdays[day]}요일${timeLabel ? ` · ${timeLabel}` : ''}`;
   }
 
-  function parseCeremonyDateTime(date, time) {
-    const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text(date));
-    const timeMatch = /^(\d{1,2}):(\d{2})$/.exec(text(time));
-    if (!dateMatch || !timeMatch) return null;
-    const hour = Number(timeMatch[1]);
-    const minute = Number(timeMatch[2]);
-    if (hour > 23 || minute > 59) return null;
-    return { year: Number(dateMatch[1]), month: Number(dateMatch[2]), day: Number(dateMatch[3]), hour, minute };
-  }
-
-  const pad = value => String(value).padStart(2, '0');
-
-  function escapeIcs(value) {
-    return text(value).replace(/\\/g, '\\\\').replace(/\r?\n/g, '\\n').replace(/([,;])/g, '\\$1');
-  }
-
-  function buildCalendarText(couple, ceremony, links) {
-    const dateTime = parseCeremonyDateTime(ceremony.date, ceremony.time);
-    if (!dateTime) return '';
-    const groom = text(couple.groom);
-    const bride = text(couple.bride);
-    const title = [groom, bride].filter(Boolean).join(' · ') || '결혼식';
-    const place = [ceremony.venue, ceremony.hall, ceremony.address].map(text).filter(Boolean).join(', ');
-    const description = [formatKoreanDate(ceremony.date, ceremony.time), place].filter(Boolean).join('\n');
-    const canonical = text(links.invitation);
-    const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
-    const localStart = `${dateTime.year}${pad(dateTime.month)}${pad(dateTime.day)}T${pad(dateTime.hour)}${pad(dateTime.minute)}00`;
-    const uidName = `${groom}-${bride}`.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '') || 'wedding';
-    return [
-      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//hunback and Jiwoo//Wedding Invitation//KO',
-      'CALSCALE:GREGORIAN', 'BEGIN:VEVENT', `UID:${dateTime.year}${pad(dateTime.month)}${pad(dateTime.day)}-${uidName}@hunback.github.io`,
-      `DTSTAMP:${stamp}`, `DTSTART;TZID=Asia/Seoul:${localStart}`, `SUMMARY:${escapeIcs(title)} 결혼식`,
-      `LOCATION:${escapeIcs(place)}`, `DESCRIPTION:${escapeIcs(description)}`, canonical ? `URL:${escapeIcs(canonical)}` : '',
-      'END:VEVENT', 'END:VCALENDAR'
-    ].filter(Boolean).join('\r\n') + '\r\n';
-  }
-
-  function applyCalendarDownload(couple, ceremony, links) {
-    const link = $('.calendar-button');
-    if (!link) return;
-    const calendarText = buildCalendarText(couple, ceremony, links);
-    if (!calendarText) {
-      if (!missing(ceremony.date) || !missing(ceremony.time)) {
-        link.removeAttribute('href');
-        link.setAttribute('aria-disabled', 'true');
-        link.addEventListener('click', event => event.preventDefault());
-      }
-      return;
-    }
-    if (!window.Blob || !window.URL?.createObjectURL) return;
-    try {
-      if (link.dataset.contentObjectUrl) window.URL.revokeObjectURL(link.dataset.contentObjectUrl);
-      const objectUrl = window.URL.createObjectURL(new Blob([calendarText], { type: 'text/calendar;charset=utf-8' }));
-      link.dataset.contentObjectUrl = objectUrl;
-      link.href = objectUrl;
-      link.download = '훈백-지우-결혼식.ics';
-      link.removeAttribute('aria-disabled');
-    } catch (_) { /* Keep the checked-in wedding.ics fallback when Blob URLs are unavailable. */ }
-  }
-
   function applyMapLinks(ceremony) {
     const query = [ceremony.venue, ceremony.hall, ceremony.address].map(text).filter(Boolean).join(' ');
     if (!query) return;
@@ -372,10 +309,9 @@
   }
   const cover = $('.cover');
   if (cover && (groom || bride)) cover.setAttribute('aria-label', `${groom} ${bride} 결혼식 초대`);
-  const endingNames = $('.ending-names');
-  if (endingNames && (groom || bride)) {
-    endingNames.replaceChildren(document.createTextNode(groom), document.createTextNode(' · '), document.createTextNode(bride));
-  }
+  setLineBreakText($('.closing-overlay p'), copy.endingOverlay);
+  const endingNames = $('.closing-overlay small');
+  if (endingNames && (groom || bride)) endingNames.textContent = [groom, bride].filter(Boolean).join(' · ');
   setText('.profile-groom .profile-name', groom);
   setText('.profile-bride .profile-name', bride);
   setText('.profile-groom .profile-name-en', groomEn);
@@ -401,19 +337,15 @@
     guestPhotosDescription: '#guest-photos .section-description',
     accountTitle: '#account h2',
     accountDescription: '#account .section-description',
-    rsvpTitle: '#rsvp h2',
-    rsvpDescription: '#rsvp .rsvp-card > p:first-of-type',
     accountNote: '.account-guide',
     guestbookButton: '#guestbook-open',
     guestUploadButton: '#guest-upload',
     guestUploadNote: '.upload-note',
-    calendarButton: '.calendar-button',
     addressCopyButton: '#copy-address',
     shareButton: '#share-link',
     coverNote: '.cover-note',
     groomProfile: '#groom-profile-copy',
     brideProfile: '#bride-profile-copy',
-    endingTitle: '.ending-title',
     localStatus: '#local-status',
     introSkip: '#intro-skip',
     introRetry: '#intro-retry',
@@ -422,11 +354,10 @@
   for (const [key, selector] of Object.entries(optionalText)) {
     const value = ui[key] ?? copy[key];
     if (value === undefined) continue;
-    const buttonLike = ['guestbookButton', 'guestUploadButton', 'calendarButton', 'addressCopyButton', 'shareButton', 'introSkip', 'introRetry'].includes(key);
+    const buttonLike = ['guestbookButton', 'guestUploadButton', 'addressCopyButton', 'shareButton', 'introSkip', 'introRetry'].includes(key);
     const element = $(selector);
     if (element && ['groomProfile', 'brideProfile'].includes(key)) setLineBreakText(element, value);
     else (buttonLike ? setLabel : setText)(selector, value);
-    if (element && key === 'endingTitle' && !missing(value)) element.hidden = false;
   }
 
   const dateNumeric = formatDate(ceremony.date);
@@ -468,14 +399,15 @@
 
   applyParents('.family-lines p:first-child', couple.groomParents, groom, 'groom');
   applyParents('.family-lines p:last-child', couple.brideParents, bride, 'bride');
-  applyPhoto('.cover-hero img', photos.mobileHero, 42);
-  applyPhoto('#ceremony-photo img', photos.mobileScarf, 3);
+  applyPhoto('.cover-hero img', photos.mobileHero);
+  applyPhoto('#ceremony-photo img', photos.mobileScarf);
   applyPhoto('#mobile-interlude-image', photos.mobileInterlude);
   applyPhoto('#mobile-album-left-image', photos.mobileAlbumLeft);
+  applyPhoto('#mobile-album-detail-image', photos.mobileAlbumDetail);
   applyPhoto('#mobile-album-right-image', photos.mobileAlbumRight);
   applyPhoto('#groom-profile-image', photos.groomProfile);
   applyPhoto('#bride-profile-image', photos.brideProfile);
-  applyPhoto('#closing-photo img', photos.mobileEnding, 13);
+  applyPhoto('#closing-photo img', photos.mobileEnding);
   if (Object.keys(assetMap).length) window.WEDDING_ASSET_MAP = assetMap;
   observeGalleryPositions();
 
@@ -494,7 +426,6 @@
   }
 
   applyMetadata(couple, ceremony, copy, links, photos.mobileHero);
-  applyCalendarDownload(couple, ceremony, links);
   applyMapLinks(ceremony);
 
   window.MOBILE_CONTENT_APPLIED = true;

@@ -7,7 +7,7 @@
   const photos = window.WEDDING_PHOTOS || [];
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
-  const state = { api: false, mode: 'offline', before: null, galleryCount: 0, deleteId: null, toastTimer: null, requestId: null };
+  const state = { api: false, mode: 'offline', before: null, galleryCount: 0, deleteId: null, toastTimer: null };
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   const apiBase = (config.apiBase || '').replace(/\/$/, '');
   const asset = (path) => window.WEDDING_ASSET_MAP?.[path] || path;
@@ -66,13 +66,13 @@
   function openDialog(id) {
     const dialog = $(id);
     $$('.form-status', dialog).forEach(el => { el.textContent = ''; el.classList.remove('success'); });
-    if (id === '#guestbook-dialog' || id === '#rsvp-dialog') {
+    if (id === '#guestbook-dialog') {
       const status = $('.form-status', dialog);
       if (!state.api) status.textContent = '접수 서버 미연결 상태입니다. 작성 화면만 확인할 수 있으며 실제 전송은 되지 않습니다.';
       else if (state.mode === 'local-preview') status.textContent = '로컬 확인용입니다. 작성 내용은 이 컴퓨터에만 저장됩니다.';
     }
     dialog.showModal();
-    if (!state.api && !isFilePreview && (id === '#guestbook-dialog' || id === '#rsvp-dialog')) {
+    if (!state.api && !isFilePreview && id === '#guestbook-dialog') {
       connect().then(() => {
         if (state.api) $('.form-status', dialog).textContent = state.mode === 'local-preview' ? '로컬 확인용입니다. 작성 내용은 이 컴퓨터에만 저장됩니다.' : '';
       });
@@ -86,7 +86,6 @@
     });
   });
   // No automatic RSVP code: there is precisely one user-triggered opening path.
-  $('#rsvp-open').addEventListener('click', () => openDialog('#rsvp-dialog'));
   $('#guestbook-open').addEventListener('click', () => openDialog('#guestbook-dialog'));
   $('#contact-open').addEventListener('click', () => openDialog('#contact-dialog'));
 
@@ -223,7 +222,14 @@
     const date = cell - first + 1; const valid = date >= 1 && date <= 31;
     const el = node('span', `${cell % 7 === 0 ? 'sunday' : ''} ${date === 19 ? 'wedding-day' : ''}`, date === 19 ? '' : (valid ? String(date) : '')); el.setAttribute('role', 'cell');
     if (date === 19) {
-      el.append(node('span', 'calendar-heart', '♡'), node('span', 'calendar-number', String(date)));
+      const heart = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      heart.setAttribute('viewBox', '0 0 48 45');
+      heart.setAttribute('aria-hidden', 'true');
+      heart.classList.add('calendar-heart');
+      const stroke = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      stroke.setAttribute('d', 'M24 38 C19 33 7 25 6 16 C4 8 10 5 16 7 C20 8 23 11 24 14 C27 8 33 5 39 8 C46 12 43 22 36 29 C32 33 27 36 24 38');
+      heart.append(stroke);
+      el.append(heart, node('span', 'calendar-number', String(date)));
     }
     if (date === 19) el.setAttribute('aria-label', '12월 19일 토요일, 결혼식'); calendar.append(el);
   }
@@ -241,7 +247,19 @@
   }
   updateCountdown(); setInterval(updateCountdown, 1000);
   $('#copy-address').addEventListener('click', () => copy(config.address));
-  $('#share-link').addEventListener('click', () => copy(config.canonicalUrl));
+  $('#share-link').addEventListener('click', async () => {
+    const url = config.canonicalUrl || 'https://hunback.github.io/';
+    if (navigator.share) {
+      try {
+        await navigator.share({title:'훈백과 지우, 결혼합니다',text:'2026년 12월 19일 낮 12시 30분 · 더테라스웨딩',url});
+      } catch (error) {
+        if (error.name !== 'AbortError') await copy(url);
+      }
+    } else {
+      await copy(url);
+      toast('초대장 링크를 복사했습니다. 카카오톡 채팅에 붙여 넣어 주세요.');
+    }
+  });
 
   function openPhoto(photo) {
     const stem = `assets/photos/photo-${String(photo.id).padStart(2,'0')}`;
@@ -252,16 +270,25 @@
   }
 
   const ceremonyPhoto = $('#ceremony-photo');
-  const scarfPhoto = photos.find(photo => photo.id === 3);
-  if (ceremonyPhoto && scarfPhoto) ceremonyPhoto.addEventListener('click', () => openPhoto(scarfPhoto));
+  if (ceremonyPhoto) ceremonyPhoto.addEventListener('click', () => {
+    const image = $('img', ceremonyPhoto);
+    const enlarged = $('#photo-dialog-image');
+    enlarged.src = image.currentSrc || image.src;
+    enlarged.alt = image.alt;
+    $('#photo-dialog-caption').textContent = image.alt;
+    $('#photo-dialog').showModal();
+  });
 
   function renderMorePhotos() {
     const end = Math.min(state.galleryCount + (state.galleryCount ? 8 : 6), photos.length); const grid = $('#gallery-grid');
+    let columns = $$('.gallery-column', grid);
+    if (!columns.length) {
+      columns = [node('div', 'gallery-column'), node('div', 'gallery-column')];
+      grid.append(...columns);
+    }
     for (let index = state.galleryCount; index < end; index++) {
       const photo = photos[index];
-      const groupStart = index === 0 || photo.group !== photos[index - 1].group;
-      if (groupStart) grid.append(node('h3', 'group-label reveal', photo.group));
-      const figure = node('figure', `reveal photo-reveal ${groupStart || photo.width > photo.height ? 'featured' : ''}`);
+      const figure = node('figure', 'reveal photo-reveal');
       figure.style.setProperty('--reveal-delay', `${index % 2 * 90}ms`);
       const button = node('button', 'gallery-photo protected-media'); button.type = 'button';
       button.setAttribute('aria-label', `${photo.alt} 크게 보기`);
@@ -269,7 +296,7 @@
       if (!window.WEDDING_ASSET_MAP) img.srcset = `${stem}-small.webp 560w, ${stem}.webp 1200w`;
       img.sizes = '(max-width: 430px) calc((100vw - 44px) / 2), 194px';
       img.alt = photo.alt; img.width = photo.width; img.height = photo.height; img.loading = 'lazy'; img.decoding = 'async'; img.draggable = false;
-      button.append(img); button.addEventListener('click', () => openPhoto(photo)); figure.append(button); grid.append(figure);
+      button.append(img); button.addEventListener('click', () => openPhoto(photo)); figure.append(button); columns[index % 2].append(figure);
     }
     state.galleryCount = end; $('#gallery-more').hidden = end >= photos.length;
     $('#photo-counter').textContent = `${end} / ${photos.length}`;
@@ -288,12 +315,12 @@
     remove.addEventListener('click', () => { state.deleteId = entry.id; $('#delete-form').reset(); openDialog('#delete-dialog'); });
     const author = node('p', 'guest-author', `From. ${entry.name}`);
     const date = new Date(entry.createdAt); const formatted = Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString('ko-KR', {timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'});
-    author.append(node('span', 'guest-date', formatted)); card.append(remove, node('p','guest-message',entry.message), author); return card;
+    author.append(node('span', 'guest-date', formatted)); card.append(remove, node('span','guest-flower','✿'), node('p','guest-message',entry.message), author); return card;
   }
-  async function loadGuests(append = false) {
+  async function loadGuests(append = false, limit = 3) {
     const list = $('#guestbook-list'); list.setAttribute('aria-busy', 'true');
     try {
-      const data = await api(`/guestbook?limit=3${append && state.before ? `&before=${state.before}` : ''}`);
+      const data = await api(`/guestbook?limit=${limit}${append && state.before ? `&before=${state.before}` : ''}`);
       if (!append) list.replaceChildren();
       data.items.forEach(entry => list.append(guestCard(entry)));
       if (!list.childElementCount) renderEmpty('아직 남겨진 축하 글이 없습니다. 첫 마음을 남겨주세요.');
@@ -301,10 +328,17 @@
       $('#guestbook-retry').hidden = true;
       $('#connection-status').textContent = state.mode === 'local-preview' ? '로컬 미리보기 · 이 컴퓨터의 테스트 기록만 표시됩니다.' : '';
       observeReveals(list);
-    } catch (error) { if (!append) renderEmpty('축하 글을 불러오지 못했습니다. 다시 불러오기를 눌러 주세요.'); $('#connection-status').textContent = error.message; $('#guestbook-retry').hidden = false; }
+      return true;
+    } catch (error) { if (!append) renderEmpty('축하 글을 불러오지 못했습니다. 다시 불러오기를 눌러 주세요.'); $('#connection-status').textContent = error.message; $('#guestbook-retry').hidden = false; return false; }
     finally { list.setAttribute('aria-busy', 'false'); }
   }
-  $('#guestbook-more').addEventListener('click', async event => { event.currentTarget.disabled = true; await loadGuests(true); event.currentTarget.disabled = false; });
+  $('#guestbook-more').addEventListener('click', async event => {
+    const button = event.currentTarget; button.disabled = true;
+    for (let page = 0; state.before && page < 20; page++) {
+      if (!await loadGuests(true, 12)) break;
+    }
+    button.disabled = false;
+  });
   let connectionTask;
   function connect() {
     if (!connectionTask) connectionTask = connectOnce().finally(() => { connectionTask = null; });
@@ -338,7 +372,7 @@
   function fieldError(id, message) { const input = $(`#${id}`); const error = $(`#${id}-error`); if (input) input.setAttribute('aria-invalid', String(!!message)); if (error) error.textContent = message; }
   function status(form, text, success = false) { const el = $('.form-status',form); el.textContent = text; el.classList.toggle('success',success); }
   $('#guest-message').addEventListener('input', event => { $('#message-counter').textContent = `${[...event.target.value].length} / 500`; });
-  ['guest-name','guest-message','guest-password','rsvp-name','rsvp-consent'].forEach(id => $(`#${id}`).addEventListener('input', () => fieldError(id,'')));
+  ['guest-name','guest-message','guest-password'].forEach(id => $(`#${id}`).addEventListener('input', () => fieldError(id,'')));
   $('#guestbook-form').addEventListener('submit', async event => {
     event.preventDefault(); const form = event.currentTarget; const data = Object.fromEntries(new FormData(form));
     const name = data.name.trim(); const message = data.message.trim(); let firstError = null;
@@ -356,22 +390,6 @@
     event.preventDefault(); const form=event.currentTarget; const button=$('.submit-button',form);button.disabled=true;
     try {await api(`/guestbook/${state.deleteId}/delete`,'POST',{password:form.elements.password.value});form.reset();$('#delete-dialog').close();await loadGuests();toast('방명록을 삭제했습니다.');}catch(error){status(form,error.message);}finally{button.disabled=false;}
   });
-  $$('#rsvp-form input[name=attendance]').forEach(radio => radio.addEventListener('change',() => {const no=$('#rsvp-form input[name=attendance]:checked').value==='no';$('#rsvp-attending-fields').hidden=no;$$('input,select', $('#rsvp-attending-fields')).forEach(el=>el.disabled=no);}));
-  function requestId() { return crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=crypto.getRandomValues(new Uint8Array(1))[0]&15;return (c==='x'?r:((r&3)|8)).toString(16);}); }
-  $('#rsvp-form').addEventListener('submit', async event => {
-    event.preventDefault();const form=event.currentTarget;const data=Object.fromEntries(new FormData(form));
-    const name=data.name.trim();const consent=$('#rsvp-consent').checked;
-    fieldError('rsvp-name',name?'':'성함을 입력해 주세요.');fieldError('rsvp-consent',consent?'':'정보 수집 및 이용 동의가 필요합니다.');
-    if(!name){$('#rsvp-name').focus();return;}if(!consent){$('#rsvp-consent').focus();return;}
-    if(!state.api){status(form,'접수 서버가 연결되지 않아 참석 의사를 전송하지 않았습니다.');return;}
-    const button=$('.submit-button',form);button.disabled=true;state.requestId ||= requestId();
-    try {
-      const result=await api('/rsvp','POST',{name,side:data.side,attendance:data.attendance,count:data.attendance==='yes'?Number(data.count):0,meal:data.attendance==='yes'?data.meal:'no',note:data.note.trim(),consent:true,website:data.website||'',requestId:state.requestId});
-      status(form,state.mode==='local-preview'?'로컬 미리보기 DB에 저장했습니다. 신랑·신부에게 실제 전송된 것은 아닙니다.':'참석 의사를 전달했습니다. 감사합니다.',true);
-      state.requestId=null;form.reset();$('#rsvp-attending-fields').hidden=false;$$('#rsvp-attending-fields input,#rsvp-attending-fields select').forEach(el=>el.disabled=false);
-    } catch(error){status(form,error.message);}finally{button.disabled=false;}
-  });
-
   for (const [side,label] of [['groom','신랑측 계좌번호'],['bride','신부측 계좌번호']]) {
     const details=node('details');details.open=true;details.append(node('summary','',label));const body=node('div','account-body');const accounts=(config.accounts||[]).filter(item=>item.side===side && item.bank && item.number && item.holder);
     accounts.forEach(account=>{

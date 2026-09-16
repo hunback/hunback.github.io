@@ -93,18 +93,18 @@ body.intro-complete .hero-drawing-heart { animation: draw-line 700ms var(--mobil
 .family-lines strong { margin-left: 11px; font-size: 16px; }
 .profile { padding-top: 95px; padding-bottom: 92px; border-top: 1px solid var(--mobile-line); }
 .profile-list { display: grid; gap: 56px; margin-top: 39px; }
-.profile-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 17px; align-items: center; text-align: left; }
+.profile-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 17px; row-gap: 21px; align-items: center; text-align: left; }
 .profile-card .profile-copy { min-width: 0; }
 .profile-bride .profile-copy { grid-column: 1; grid-row: 1; text-align: right; }
 .profile-bride .profile-portrait { grid-column: 2; grid-row: 1; }
-.profile-portrait { width: 100%; aspect-ratio: 1; margin: 0; overflow: hidden; border: 1px solid var(--mobile-line); border-radius: 4px; background: var(--mobile-soft); }
+.profile-portrait { width: 100%; aspect-ratio: 1; margin: 0; overflow: hidden; border: 0; border-radius: 3px; background: var(--mobile-soft); }
 .profile-portrait img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
 .profile-groom .profile-portrait img { object-position: 72% 50%; }
 .profile-bride .profile-portrait img { object-position: 50% 28%; }
 .profile-role { margin-bottom: 11px; color: var(--mobile-lavender); font: 500 9px/1.2 Montserrat, sans-serif; letter-spacing: .16em; }
-.profile-name { color: var(--mobile-ink); font: 400 27px/1 var(--mobile-hand); }
+.profile-name { color: var(--mobile-ink); font: 600 28px/1.15 -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; letter-spacing: -.06em; }
 .profile-name-en { margin-top: 7px; color: var(--mobile-muted); font: 500 9px/1.2 Montserrat, sans-serif; letter-spacing: .08em; }
-.profile-intro { margin-top: 17px; color: var(--mobile-ink); font-size: 14px; line-height: 1.85; word-break: keep-all; }
+.profile-intro { grid-column: 1 / -1; margin: 0; color: var(--mobile-ink); font-size: 13px; line-height: 1.85; text-align: center; word-break: keep-all; }
 .editorial-photo { margin: 0 20px; overflow: hidden; background: var(--mobile-soft); }
 .editorial-photo img { width: 100%; height: min(438px, calc((100vw - 40px) * 1.25)); object-fit: cover; object-position: center; }
 
@@ -116,18 +116,18 @@ body.intro-complete .hero-drawing-heart { animation: draw-line 700ms var(--mobil
 .calendar span { min-height: 35px; color: var(--mobile-ink); font-family: Montserrat, sans-serif; font-size: 12px; }
 .calendar .weekday { color: var(--mobile-muted); font-family: var(--mobile-body); font-size: 10px; }
 .calendar .sunday { color: var(--mobile-lavender); }
-.calendar .wedding-day { width: 42px; min-height: 38px; position: relative; display: grid; place-items: center; border: 0; border-radius: 0; background: transparent; color: var(--mobile-lavender); }
-.calendar .wedding-day .calendar-heart { position: absolute; inset: 0; display: grid; place-items: center; font-family: Georgia, serif; font-size: 40px; line-height: 1; font-weight: 400; }
-.calendar .wedding-day .calendar-number { position: relative; z-index: 1; margin-top: 1px; font-family: var(--mobile-display); font-size: 11px; line-height: 1; color: var(--mobile-lavender); }
-.countdown-clock { min-height: 68px; margin: 30px auto 24px; gap: 8px; color: var(--mobile-ink); }
-.clock-unit { min-width: 42px; }
-.clock-unit small { color: var(--mobile-muted); font-size: 7px; letter-spacing: .1em; }
-.clock-unit strong { color: var(--mobile-ink); font: 400 24px/1 var(--mobile-display); }
-.clock-separator { color: var(--mobile-line); }
-.countdown-message { color: var(--mobile-muted); }
+.calendar .wedding-day { width: 42px; min-height: 40px; position: relative; display: grid; place-items: center; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: var(--mobile-ink); }
+.calendar .wedding-day .calendar-heart { position: absolute; inset: 0; display: block; width: 42px; height: 40px; margin: auto; overflow: visible; fill: none; stroke: #525b76; stroke-width: 1.15; stroke-linecap: round; stroke-linejoin: round; opacity: .78; }
+.calendar .wedding-day .calendar-number { position: relative; z-index: 1; margin-top: 6px; font-family: var(--mobile-display); font-size: 12px; line-height: 1; color: var(--mobile-ink); }
+.countdown-clock { display: grid; grid-template-columns: repeat(7, min-content); justify-content: center; align-items: start; column-gap: 5px; row-gap: 12px; min-height: 0; margin: 30px auto 30px; color: var(--mobile-ink); }
+.clock-unit { display: grid; justify-items: center; gap: 5px; min-width: 44px; }
+.clock-unit small { color: var(--mobile-muted); font: 400 9px/1.2 var(--mobile-display); letter-spacing: .02em; }
+.clock-unit strong { color: var(--mobile-ink); font: 500 25px/1 var(--mobile-display); font-variant-numeric: tabular-nums; }
+.clock-separator { align-self: end; padding: 0 0 2px; color: var(--mobile-muted); font: 18px/1 var(--mobile-display); }
+.countdown-message { grid-column: 1 / -1; position: static; width: auto; margin: 5px 0 0; color: var(--mobile-ink); font-size: 12px; line-height: 1.7; }
 .ceremony-photo { margin: 38px 0 0; text-align: left; }
 .ceremony-photo .gallery-photo { width: 100%; background: var(--mobile-soft); }
-.ceremony-photo img { width: 100%; height: clamp(90px, 28.2vw, 124px); aspect-ratio: 3/1; object-fit: cover; object-position: 50% 46%; }
+.ceremony-photo img { width: 100%; height: clamp(90px, 28.2vw, 124px); aspect-ratio: 3/1; object-fit: cover; object-position: 50% 42%; }
 
 .outline-button, .solid-button { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; gap: 13px; padding: 11px 18px; border-radius: 0; font-size: 12px; line-height: 1.5; }
 .outline-button { border: 1px solid var(--mobile-line); background: transparent; color: var(--mobile-ink); }
@@ -157,10 +157,11 @@ body.intro-complete .hero-drawing-heart { animation: draw-line 700ms var(--mobil
 
 .gallery { padding: 96px 18px 92px; }
 .gallery .section-description { margin-bottom: 27px; }
-.gallery-grid { display: block; columns: 2; column-gap: 8px; }
+.gallery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; align-items: start; }
+.gallery-column { display: flex; min-width: 0; flex-direction: column; gap: 9px; }
 .gallery-grid .group-label { display: none; }
 .gallery-grid .group-label:first-child { margin-top: 0; }
-.gallery-grid figure { min-width: 0; margin: 0 0 7px; break-inside: avoid; overflow: hidden; border-radius: 4px !important; background: var(--mobile-soft); }
+.gallery-grid figure { min-width: 0; margin: 0; overflow: hidden; border-radius: 4px !important; background: var(--mobile-soft); }
 .gallery-grid figure.featured { grid-column: auto; }
 .gallery-grid figure img { display: block; width: 100%; height: auto; aspect-ratio: auto !important; object-fit: initial !important; object-position: initial; }
 .gallery-photo { display: block; width: 100%; padding: 0; overflow: hidden; border: 0; border-radius: 4px !important; background: var(--mobile-soft); }
@@ -176,28 +177,33 @@ body.intro-complete .hero-drawing-heart { animation: draw-line 700ms var(--mobil
 .photo-dialog figcaption { padding: 11px 42px 0; color: #fff; font-size: 12px; text-align: center; }
 .photo-dialog-close { position: absolute; z-index: 1; top: -42px; right: 0; width: 36px; height: 36px; color: #fff; font: 30px/32px Arial; }
 
-.guestbook { padding: 96px 28px 89px; border-top: 1px solid var(--mobile-line); }
+.guestbook { padding: 96px 0 89px; border-top: 1px solid var(--mobile-line); }
+.guestbook > .section-index, .guestbook > h2 { margin-right: 28px; margin-left: 28px; }
 .guestbook-write { width: 100%; margin: 0 0 27px; }
-.guestbook-list { border-top: 1px solid var(--mobile-line); }
-.guest-card { position: relative; min-height: 0; padding: 25px 5px 23px; border: 0; border-bottom: 1px solid var(--mobile-line); border-radius: 0; background: transparent; box-shadow: none; }
-.guest-card .guest-message { color: var(--mobile-ink); font-family: var(--mobile-body); font-size: 15px; line-height: 1.9; text-align: center; }
-.guest-card .guest-author { margin-top: 16px; color: var(--mobile-muted); font-size: 11px; text-align: right; }
+.guestbook-list { display: flex; gap: 10px; margin-top: 29px; padding: 0 28px 12px; overflow-x: auto; border: 0; scroll-snap-type: x proximity; scrollbar-width: thin; }
+.guest-card { position: relative; display: flex; flex: 0 0 190px; flex-direction: column; min-height: 260px; padding: 36px 13px 19px; border: 1px solid #EEE2E5; border-radius: 7px; background: #FFFBFC; box-shadow: 0 4px 13px rgba(32,44,70,.04); scroll-snap-align: start; }
+.guest-flower { display: block; color: var(--mobile-lavender); font-size: 17px; line-height: 1; }
+.guest-card .guest-message { max-height: 158px; margin-top: 17px; overflow: auto; color: var(--mobile-ink); font-family: var(--mobile-body); font-size: 12px; line-height: 1.75; text-align: left; overflow-wrap: anywhere; }
+.guest-card .guest-author { margin-top: auto; padding-top: 16px; color: var(--mobile-muted); font-size: 11px; text-align: center; }
 .guest-card .guest-date { color: var(--mobile-muted); }
-.guest-delete { color: var(--mobile-muted); }
-.empty-card { padding: 25px 5px; color: var(--mobile-muted); font-size: 12px; }
-.guestbook-actions { margin-top: 23px; }
+.guest-delete { position: absolute; top: 8px; right: 10px; color: var(--mobile-muted); }
+.empty-card { flex: 1 0 calc(100% - 56px); min-height: 126px; padding: 28px 20px; color: var(--mobile-muted); font-size: 12px; }
+.guestbook-actions { display: flex; justify-content: flex-end; gap: 20px; margin: 17px 28px 0; }
+.guestbook-actions .text-button { border: 0; color: var(--mobile-ink); font-size: 12px; }
 .connection-status { color: var(--mobile-muted); font-size: 11px; }
 
-.guest-photos { padding: 96px 28px 85px; border-top: 1px solid var(--mobile-line); border-bottom: 1px solid var(--mobile-line); background: #ECEBEA; }
-.album-art { position: relative; height: 220px; max-width: 285px; margin: 8px auto 27px; }
-.album-art figure { position: absolute; top: 14px; left: 8px; width: 132px; padding: 7px 7px 4px; border: 1px solid var(--mobile-line); border-radius: 0 !important; background: var(--mobile-paper); transform: rotate(-5deg); }
-.album-art figure + figure { top: 38px; right: 8px; left: auto; transform: rotate(5deg); }
-.album-art img { width: 100%; height: 132px; object-fit: cover; }
+.guest-photos { padding: 96px 28px 85px; border-top: 1px solid var(--mobile-line); border-bottom: 1px solid var(--mobile-line); background: var(--mobile-paper); }
+.guest-photos .section-description { margin-top: 24px; font-size: 13px; line-height: 2.1; }
+.album-art { position: relative; height: 194px; max-width: 285px; margin: 12px auto 18px; }
+.album-art figure { position: absolute; top: 20px; left: 5px; width: 138px; padding: 6px; border: 0; border-radius: 18px !important; background: #fff; box-shadow: 0 6px 13px rgba(32,44,70,.13); transform: rotate(-15deg); }
+.album-art figure:nth-child(2) { z-index: 1; top: 13px; left: 77px; width: 137px; transform: rotate(-2deg); }
+.album-art figure:nth-child(3) { z-index: 2; top: 22px; right: 5px; left: auto; width: 138px; transform: rotate(12deg); }
+.album-art img { width: 100%; height: 137px; border-radius: 13px; object-fit: cover; }
 .guest-upload-button { width: 100%; }
 .direct-upload[hidden] { display: none; }
 .direct-upload { display: grid; gap: 10px; }
 .direct-upload input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; }
-.direct-upload .solid-button { cursor: pointer; }
+.direct-upload .outline-button { cursor: pointer; }
 .direct-upload .outline-button:disabled { opacity: .55; cursor: default; }
 .direct-upload .upload-note { margin: 0; line-height: 1.6; text-align: center; }
 .upload-note, .upload-help, .upload-help ol, .upload-help p { color: var(--mobile-muted); }
@@ -233,9 +239,15 @@ body.intro-complete .hero-drawing-heart { animation: draw-line 700ms var(--mobil
 .music-fab:hover { border-color: var(--mobile-lavender); color: var(--mobile-lavender); }
 .music-fab-wrap audio { display: none; }
 
-.closing-photo { margin: 0 20px; overflow: hidden; background: var(--mobile-soft); }
-.closing-photo img { width: 100%; aspect-ratio: 3/2; object-fit: cover; object-position: center; }
-.ending { position: relative; padding: 96px 24px 48px; text-align: center; }
+.closing-photo { position: relative; margin: 0; overflow: hidden; background: var(--mobile-soft); }
+.closing-photo::after { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(12,25,20,.02) 18%, rgba(12,25,20,.15) 54%, rgba(12,25,20,.68) 100%); content: ''; pointer-events: none; }
+.closing-photo img { width: 100%; height: min(650px, 150vw); min-height: 520px; object-fit: cover; object-position: 50% 50%; }
+.closing-overlay { position: absolute; z-index: 1; right: 25px; bottom: 57px; left: 27px; color: #fff; text-align: left; text-shadow: 0 1px 6px rgba(0,0,0,.35); }
+.closing-overlay p { font-size: 15px; line-height: 1.95; word-break: keep-all; }
+.closing-overlay small { display: block; margin-top: 21px; font-size: 11px; letter-spacing: .13em; }
+.closing-photo.is-visible .closing-overlay { animation: closing-copy-appear 1300ms ease-out both; }
+@keyframes closing-copy-appear { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+.ending { position: relative; padding: 34px 24px 54px; text-align: center; }
 .ending-drawing { display: block; width: min(220px, 68vw); height: 110px; margin: 0 auto 5px; overflow: visible; }
 .ending-drawing path { fill: none; stroke: var(--mobile-lavender); stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
 body.intro-complete .ending.is-visible .ending-line { animation: draw-line 2100ms var(--mobile-ease) 160ms forwards; }
@@ -245,6 +257,9 @@ body.intro-complete .ending.is-visible .ending-heart { animation: draw-line 850m
 .ending .closing-script { margin: 24px 0 18px; color: var(--mobile-lavender); font: 34px/1.1 var(--mobile-hand) !important; }
 .ending-names { margin-bottom: 22px; color: var(--mobile-ink); font-family: var(--mobile-display); font-size: 22px !important; letter-spacing: .1em; }
 .ending .local-status { margin-top: 24px; color: var(--mobile-muted); font-size: 10px !important; }
+.kakao-share-button { display: inline-flex; min-height: 46px; align-items: center; justify-content: center; gap: 8px; margin-top: 24px; padding: 9px 16px; border: 1px solid var(--mobile-line); border-radius: 3px; background: #fff; color: var(--mobile-ink); font-size: 12px; }
+.kakao-symbol { display: block; width: 19px; height: 19px; flex: 0 0 auto; }
+.share-hint { margin-top: 9px; color: var(--mobile-muted); font-size: 10px; }
 
 .editorial-photo,
 .ceremony-photo,
