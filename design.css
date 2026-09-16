@@ -83,7 +83,7 @@ body.intro-complete .hero-drawing-heart { animation: draw-line 700ms var(--mobil
 .letter-copy { max-width: 275px; margin: 36px auto 0; color: var(--mobile-ink); font-size: 16px; line-height: 1.95; }
 .letter-copy p + p { margin-top: 30px; }
 .scripture-quote { max-width: 300px; margin: 34px auto 38px; padding: 25px 17px 0; border-top: 1px solid var(--mobile-line); color: var(--mobile-ink); font-family: var(--body-font); font-size: 13px; line-height: 2; }
-.scripture-quote p { margin: 0; word-break: keep-all; }
+.scripture-quote p { margin: 0; white-space: pre-line; word-break: keep-all; }
 .scripture-quote cite { display: block; margin-top: 12px; color: var(--mobile-accent); font-size: 11px; font-style: normal; letter-spacing: .05em; }
 .letter-mark { display: block; width: 132px; height: 32px; margin: 35px auto 38px; color: var(--mobile-lavender); overflow: visible; }
 .letter-mark path { fill: none; stroke: currentColor; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 0; }
