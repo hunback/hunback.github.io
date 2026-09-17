@@ -268,10 +268,16 @@
     if (kakaoShareReady) {
       try {
         window.Kakao.Share.sendDefault({
-          objectType: 'text',
-          text: '훈백과 지우가 결혼합니다.\n2026년 12월 19일 토요일 낮 12시 30분\n더테라스웨딩 11층 더테라스 홀',
-          link: {mobileWebUrl: url, webUrl: url},
-          buttonTitle: '청첩장 보기'
+          objectType: 'feed',
+          content: {
+            title: '훈백과 지우가 결혼합니다',
+            description: '2026년 12월 19일 토요일 낮 12시 30분 · 더테라스웨딩 11층 더테라스 홀',
+            imageUrl: 'https://hunback.github.io/assets/share/invitation-cover.jpg',
+            imageWidth: 1333,
+            imageHeight: 2000,
+            link: {mobileWebUrl: url, webUrl: url}
+          },
+          buttons: [{title: '청첩장 보기', link: {mobileWebUrl: url, webUrl: url}}]
         });
         return;
       } catch (_) { /* 기기에서 카카오 공유를 열지 못하면 기본 공유 메뉴를 사용합니다. */ }
