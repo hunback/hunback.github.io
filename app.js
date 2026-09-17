@@ -333,7 +333,8 @@
 
   function renderEmpty(message) {
     const card = node('article', 'guest-card empty-card reveal');
-    card.append(node('p', '', message)); $('#guestbook-list').replaceChildren(card); $('#guestbook-list').setAttribute('aria-busy', 'false');
+    card.append(node('span', 'guest-flower', '✿'), node('p', '', message));
+    $('#guestbook-list').replaceChildren(card); $('#guestbook-list').setAttribute('aria-busy', 'false');
     observeReveals(card);
   }
   function guestCard(entry) {
