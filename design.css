@@ -93,8 +93,9 @@ body.intro-complete .hero-drawing-heart { animation: draw-line 700ms var(--mobil
 .family-lines strong { margin-left: 11px; font-size: 16px; }
 .profile { padding-top: 95px; padding-bottom: 92px; border-top: 1px solid var(--mobile-line); }
 .profile-list { display: grid; gap: 56px; margin-top: 39px; }
-.profile-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 17px; row-gap: 21px; align-items: center; text-align: left; }
+.profile-card { display: grid; grid-template-columns: 42% minmax(0, 1fr); gap: 16px; align-items: center; text-align: left; }
 .profile-card .profile-copy { min-width: 0; }
+.profile-bride { grid-template-columns: minmax(0, 1fr) 42%; }
 .profile-bride .profile-copy { grid-column: 1; grid-row: 1; text-align: right; }
 .profile-bride .profile-portrait { grid-column: 2; grid-row: 1; }
 .profile-portrait { width: 100%; aspect-ratio: 1; margin: 0; overflow: hidden; border: 0; border-radius: 3px; background: var(--mobile-soft); }
@@ -104,7 +105,7 @@ body.intro-complete .hero-drawing-heart { animation: draw-line 700ms var(--mobil
 .profile-role { margin-bottom: 11px; color: var(--mobile-lavender); font: 500 9px/1.2 Montserrat, sans-serif; letter-spacing: .16em; }
 .profile-name { color: var(--mobile-ink); font: 600 28px/1.15 -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; letter-spacing: -.06em; }
 .profile-name-en { margin-top: 7px; color: var(--mobile-muted); font: 500 9px/1.2 Montserrat, sans-serif; letter-spacing: .08em; }
-.profile-intro { grid-column: 1 / -1; margin: 0; color: var(--mobile-ink); font-size: 13px; line-height: 1.85; text-align: center; word-break: keep-all; }
+.profile-intro { margin-top: 17px; color: var(--mobile-ink); font-size: 12px; line-height: 1.85; text-align: inherit; word-break: keep-all; }
 .editorial-photo { margin: 0 20px; overflow: hidden; background: var(--mobile-soft); }
 .editorial-photo img { width: 100%; height: min(438px, calc((100vw - 40px) * 1.25)); object-fit: cover; object-position: center; }
 
@@ -164,6 +165,7 @@ body.intro-complete .hero-drawing-heart { animation: draw-line 700ms var(--mobil
 .gallery-grid figure { min-width: 0; margin: 0; overflow: hidden; border-radius: 4px !important; background: var(--mobile-soft); }
 .gallery-grid figure.featured { grid-column: auto; }
 .gallery-grid figure img { display: block; width: 100%; height: auto; aspect-ratio: auto !important; object-fit: initial !important; object-position: initial; }
+.gallery-grid .gallery-column:last-child figure:first-child img { aspect-ratio: 4/3 !important; object-fit: cover !important; }
 .gallery-photo { display: block; width: 100%; padding: 0; overflow: hidden; border: 0; border-radius: 4px !important; background: var(--mobile-soft); }
 .gallery-photo img { display: block; width: 100%; height: auto; }
 .more-button { min-width: 164px; margin-top: 27px; }

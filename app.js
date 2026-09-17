@@ -247,8 +247,35 @@
   }
   updateCountdown(); setInterval(updateCountdown, 1000);
   $('#copy-address').addEventListener('click', () => copy(config.address));
+  let kakaoShareReady = false;
+  const kakaoKey = typeof config.kakaoJavaScriptKey === 'string' ? config.kakaoJavaScriptKey.trim() : '';
+  if (kakaoKey && location.protocol === 'https:') {
+    const sdk = document.createElement('script');
+    sdk.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.8.3/kakao.min.js';
+    sdk.integrity = 'sha384-oroumrnFVE0xtgqyDZJARgERibXg2C28380uaUZz2kHDS5CR7tu20eGiOU6GkTpy';
+    sdk.crossOrigin = 'anonymous';
+    sdk.onload = () => {
+      try {
+        if (!window.Kakao?.isInitialized()) window.Kakao?.init(kakaoKey);
+        kakaoShareReady = Boolean(window.Kakao?.isInitialized() && window.Kakao?.Share?.sendDefault);
+        if (kakaoShareReady) $('.share-hint').textContent = '카카오톡에서 받을 사람을 선택해 주세요.';
+      } catch (_) { kakaoShareReady = false; }
+    };
+    document.head.append(sdk);
+  }
   $('#share-link').addEventListener('click', async () => {
     const url = config.canonicalUrl || 'https://hunback.github.io/';
+    if (kakaoShareReady) {
+      try {
+        window.Kakao.Share.sendDefault({
+          objectType: 'text',
+          text: '훈백과 지우가 결혼합니다.\n2026년 12월 19일 토요일 낮 12시 30분\n더테라스웨딩 11층 더테라스 홀',
+          link: {mobileWebUrl: url, webUrl: url},
+          buttonTitle: '청첩장 보기'
+        });
+        return;
+      } catch (_) { /* 기기에서 카카오 공유를 열지 못하면 기본 공유 메뉴를 사용합니다. */ }
+    }
     if (navigator.share) {
       try {
         await navigator.share({title:'훈백과 지우, 결혼합니다',text:'2026년 12월 19일 낮 12시 30분 · 더테라스웨딩',url});

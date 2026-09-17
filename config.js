@@ -1,7 +1,9 @@
 /* Public configuration. Never put an API secret, administrator token, or guest data here. */
 window.WEDDING_CONFIG = {
-  version: 'mobile-20260913-garden-complete',
+  version: 'mobile-20260917-kakao-share',
   canonicalUrl: 'https://hunback.github.io/',
+  // 카카오디벨로퍼스 JavaScript 키만 넣습니다. 어드민 키와 REST API 키는 넣지 않습니다.
+  kakaoJavaScriptKey: '7c74f3002f659bfacaebba51deb1aac5',
   // Local work uses local SQLite; the public invitation uses the hosted D1 API.
   apiBase: (['localhost', '127.0.0.1', '[::1]'].includes(location.hostname) || /^(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname))
     ? '' : 'https://hunback-wedding-api.hunback2315.workers.dev',
