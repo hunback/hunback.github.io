@@ -674,7 +674,7 @@
       if (url.protocol === 'https:' && url.hostname === 'drive.google.com' && url.pathname.startsWith('/drive/folders/') && !url.username && !url.password) $('#guest-upload').href = url.href;
     } catch (_) { /* The restored, verified album link remains available. */ }
   }
-  const guestFiles = $('#guest-files'), guestSend = $('#guest-send');
+  const guestFiles = $('#guest-files');
   const uploadTypes = {'heic':'image/heic','heif':'image/heif','mov':'video/quicktime','jpg':'image/jpeg','jpeg':'image/jpeg','png':'image/png','webp':'image/webp','mp4':'video/mp4'};
   function selectedType(file) { return file.type || uploadTypes[file.name.split('.').at(-1).toLowerCase()] || ''; }
   const canvasBlob = (canvas, type, quality) => new Promise(resolve => canvas.toBlob(resolve, type, quality));
@@ -713,24 +713,59 @@
       return {body: blob, type: 'image/jpeg', optimized: true};
     } finally { source.close?.(); }
   }
-  guestFiles.addEventListener('change', () => {
+  let videoEncoderTask, videoEncoder, encodingLabel = '';
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const existing = document.querySelector(`script[src="${src}"]`);
+      if (existing) { if (window.FFmpegWASM) resolve(); else existing.addEventListener('load', resolve, {once:true}); return; }
+      const script = document.createElement('script'); script.src = src; script.onload = resolve; script.onerror = reject; document.head.append(script);
+    });
+  }
+  async function getVideoEncoder() {
+    if (!videoEncoderTask) videoEncoderTask = (async () => {
+      await loadScript('assets/ffmpeg/ffmpeg.js');
+      const ffmpeg = new window.FFmpegWASM.FFmpeg();
+      ffmpeg.on('progress', ({progress}) => {
+        if (encodingLabel && Number.isFinite(progress)) $('#upload-status').textContent = `${encodingLabel} · ${Math.max(1, Math.min(99, Math.round(progress * 100)))}%`;
+      });
+      await ffmpeg.load({coreURL:'assets/ffmpeg/ffmpeg-core.js',wasmURL:'assets/ffmpeg/ffmpeg-core.wasm'});
+      videoEncoder = ffmpeg; return ffmpeg;
+    })().catch(error => { videoEncoderTask = null; throw error; });
+    return videoEncoderTask;
+  }
+  async function optimizeVideo(file, position) {
+    if (file.type === 'video/mp4' && file.size <= 18 * 1024 * 1024)
+      return {body:file,type:'video/mp4',optimized:false};
+    encodingLabel = `${position} 고화질 영상 최적화 중`;
+    const ffmpeg = await getVideoEncoder();
+    const id = crypto.randomUUID().replaceAll('-', ''), extension = file.type === 'video/quicktime' ? 'mov' : 'mp4';
+    const input = `${id}.${extension}`, output = `${id}-optimized.mp4`;
+    try {
+      await ffmpeg.writeFile(input, new Uint8Array(await file.arrayBuffer()));
+      const code = await ffmpeg.exec(['-i',input,'-vf','scale=1920:1920:force_original_aspect_ratio=decrease:force_divisible_by=2','-c:v','libx264','-preset','veryfast','-crf','20','-profile:v','high','-pix_fmt','yuv420p','-c:a','aac','-b:a','160k','-ar','48000','-movflags','+faststart',output], 300000);
+      if (code !== 0) throw new Error('영상 변환을 완료하지 못했습니다.');
+      const data = await ffmpeg.readFile(output), blob = new Blob([data.buffer], {type:'video/mp4'});
+      if (!blob.size) throw new Error('영상 변환 결과가 비어 있습니다.');
+      if (blob.size >= file.size && file.size <= 95 * 1024 * 1024) return {body:file,type:selectedType(file),optimized:false};
+      return {body:blob,type:'video/mp4',optimized:true};
+    } finally {
+      encodingLabel = '';
+      try { await ffmpeg.deleteFile(input); } catch (_) {}
+      try { await ffmpeg.deleteFile(output); } catch (_) {}
+    }
+  }
+  async function uploadSelectedFiles() {
+    if (!state.api || ![...guestFiles.files].length || guestFiles.disabled) return;
     const files = [...guestFiles.files];
-    $('#upload-selection').textContent = files.length ? `${files.length}개 선택 · ${files.map(file => file.name).join(', ')}` : '사진·영상을 선택해 주세요. 한 번에 5개까지 올릴 수 있습니다.';
-    $('#upload-status').textContent = '';
-    guestSend.disabled = !files.length || files.length > 5;
-    if (files.length > 5) $('#upload-status').textContent = '한 번에 5개까지만 선택해 주세요.';
-  });
-  guestSend.addEventListener('click', async () => {
-    if (!state.api || ![...guestFiles.files].length) return;
-    const files = [...guestFiles.files];
-    if (files.length > 5) return;
-    guestSend.disabled = true;
+    if (files.length > 5) { $('#upload-status').textContent = '한 번에는 5개씩 올려주세요.'; guestFiles.value=''; return; }
+    guestFiles.disabled = true;
+    try {
     let sent = 0;
     for (const file of files) {
       const originalType = selectedType(file);
-      const originalMax = originalType.startsWith('video/') ? 50 * 1024 * 1024 : 60 * 1024 * 1024;
+      const originalMax = originalType.startsWith('video/') ? 95 * 1024 * 1024 : 80 * 1024 * 1024;
       if (!originalType || !['image/jpeg','image/png','image/webp','image/heic','image/heif','video/mp4','video/quicktime'].includes(originalType) || file.size < 12 || file.size > originalMax) {
-        $('#upload-status').textContent = `${file.name}: 사진은 원본 60MB, 영상은 50MB 이하의 JPG·PNG·WebP·HEIC·MP4·MOV 파일을 선택해 주세요.`;
+        $('#upload-status').textContent = `${file.name}: 이 파일은 휴대폰에서 안전하게 처리하기 어렵습니다.`;
         break;
       }
       let prepared = {body: file, type: originalType, optimized: false};
@@ -740,12 +775,15 @@
         catch (error) {
           if (file.size > 20 * 1024 * 1024) { $('#upload-status').textContent = `${file.name}: ${error.message}`; break; }
         }
+      } else {
+        try { prepared = await optimizeVideo(file, `${sent + 1}/${files.length}`); }
+        catch (_) { prepared = {body:file,type:originalType,optimized:false}; }
       }
-      if (prepared.body.size > (prepared.type.startsWith('video/') ? 50 : 20) * 1024 * 1024) {
-        $('#upload-status').textContent = `${file.name}: 최적화 후에도 파일이 너무 큽니다.`; break;
+      if (prepared.body.size > (prepared.type.startsWith('video/') ? 95 : 25) * 1024 * 1024) {
+        $('#upload-status').textContent = `${file.name}: 이 파일은 전송 가능한 크기로 줄이지 못했습니다.`; break;
       }
       $('#upload-status').textContent = `${sent + 1}/${files.length} 업로드 중 · ${file.name}`;
-      const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 120000);
+      const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 300000);
       try {
         const response = await fetch(`${apiBase}/api/photos`, {method:'POST',body:prepared.body,headers:{'Content-Type':prepared.type,'Accept':'application/json','X-Upload-Name':encodeURIComponent(file.name),'X-Original-Size':String(file.size),'X-Optimized':prepared.optimized?'1':'0'},credentials:'omit',cache:'no-store',signal:controller.signal});
         const result = await response.json();
@@ -759,9 +797,10 @@
     if (sent === files.length) {
       $('#upload-status').textContent = state.mode === 'local-preview' ? `${sent}개를 이 컴퓨터의 테스트 폴더에 저장했습니다.` : `${sent}개를 두 사람에게 전달했습니다. 고맙습니다.`;
       guestFiles.value = '';
-      $('#upload-selection').textContent = '사진·영상을 선택해 주세요. 한 번에 5개까지 올릴 수 있습니다.';
-    } else guestSend.disabled = false;
-  });
+    }
+    } finally { guestFiles.disabled = false; }
+  }
+  guestFiles.addEventListener('change', uploadSelectedFiles);
   // All useful sections participate, including controls and dynamically built cards.
   $$('.section > .map-actions, .transport-list, .calendar-button, .gallery-guide, .guestbook-actions, .account-guide, .rsvp-card, .closing-photo, .ending > p').forEach(el => el.classList.add('reveal'));
   observeReveals();
