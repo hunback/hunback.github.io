@@ -136,7 +136,7 @@ body.intro-complete .hero-drawing-heart { animation: draw-line 700ms var(--mobil
 .clock-unit small { color: #999; font: 400 11px/16px var(--mobile-display); letter-spacing: normal; }
 .clock-unit strong { color: var(--detail-ink); font: 500 25px/28px var(--mobile-display); font-variant-numeric: tabular-nums; }
 .clock-separator { align-self: end; padding: 0 0 2px; color: var(--mobile-muted); font: 18px/1 var(--mobile-display); }
-.countdown-message { grid-column: 1 / -1; position: static; width: auto; margin: 8px 0 0; color: var(--detail-ink); font-size: 13px; line-height: 25px; }
+.countdown-message { white-space: nowrap; grid-column: 1 / -1; position: static; width: auto; margin: 8px 0 0; color: var(--detail-ink); font-size: 13px; line-height: 25px; }
 .ceremony-photo { margin: 38px 0 0; text-align: left; }
 .ceremony-photo .gallery-photo { width: 100%; background: var(--mobile-soft); }
 .ceremony-photo img { width: 100%; height: clamp(90px, 28.2vw, 124px); aspect-ratio: 3/1; object-fit: cover; object-position: 50% 42%; }
