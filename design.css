@@ -397,16 +397,13 @@ body.photo-open { overflow: hidden; }
 .photo-load-status { position: absolute; top: 46%; left: 0; width: 100%; color: #FFF; font-size: 13px; text-align: center; pointer-events: none; }
 .photo-retry { position: absolute; top: 55%; left: 50%; padding: 8px 14px; transform: translateX(-50%); border: 1px solid #999; border-radius: 6px; background: #FFF; color: #333; font-size: 12px; }
 
-/* Portrait and name share a row; the full-width message stays easy to read. */
-.profile-card { grid-template-columns: 46% minmax(0,1fr); gap: 24px 20px; align-items: center; }
-.profile-groom .profile-copy { grid-column: 2; grid-row: 1; text-align: center; }
-.profile-groom .profile-portrait { grid-column: 1; grid-row: 1; }
-.profile-card .profile-intro { grid-column: 1 / -1; grid-row: 2; margin: 0; text-align: center; font-size: clamp(12px, 3.3vw, 14px); line-height: 2.1; word-break: keep-all; }
-.profile-bride { grid-template-columns: minmax(0,1fr) 46%; }
-.profile-bride .profile-copy { grid-column: 1; grid-row: 1; text-align: center; }
-.profile-bride .profile-portrait { grid-column: 2; grid-row: 1; }
+/* Reference profile: two balanced columns with aligned portraits and names. */
+.profile-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 22px; align-items: start; }
+.profile-card, .profile-bride { display: flex; flex-direction: column; gap: 0; min-width: 0; align-items: stretch; }
+.profile-card .profile-portrait { order: 0; width: 100%; margin: 0 0 20px; aspect-ratio: 1; }
+.profile-card .profile-copy { order: 1; padding-bottom: 14px; border-bottom: 1px solid #dedbdc; text-align: center; }
+.profile-card .profile-intro { order: 2; margin: 14px 0 0; text-align: center; font-size: clamp(11px,3vw,13px); line-height: 2; word-break: keep-all; }
 .profile-name { font-size: 17px; }
-.profile-list { gap: 54px; }
 .letter-copy { white-space: nowrap; font-size: clamp(12px, 3.6vw, 14px); }
 /* Compact share control; the full button remains in the page footer. */
 .share-floating { position: fixed; z-index: 1010; right: max(16px, calc((100vw - 430px) / 2 + 16px)); bottom: calc(18px + env(safe-area-inset-bottom)); width: 48px; height: 48px; padding: 12px; border-radius: 50%; background: #FEE500; box-shadow: 0 3px 14px #33281b20; }
