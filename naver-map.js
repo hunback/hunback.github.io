@@ -6,7 +6,7 @@
   const settings = content.naverMap || {};
   const ceremony = content.ceremony || {};
   const query = [ceremony.venue, ceremony.address].filter(Boolean).join(' ');
-  const url = `https://map.naver.com/p/search/${encodeURIComponent(query)}`;
+  const url = ceremony.maps?.naver || `https://map.naver.com/p/search/${encodeURIComponent(query)}`;
   const route = document.createElement('a');
   route.href = 'assets/maps/terrace-location.pdf';
   route.target = '_blank';
