@@ -29,7 +29,8 @@
     $('#total-size').textContent = formatSize(state.items.reduce((sum, item) => sum + item.size, 0));
   };
   const download = async (item, preview = false) => {
-    const response = await request(`/admin/photos/file?key=${encodeURIComponent(item.key)}`, {headers: {Accept: item.type}});
+    const query = item.source === 'mybox' ? `myboxId=${encodeURIComponent(item.myboxId)}` : `key=${encodeURIComponent(item.key)}`;
+    const response = await request(`/admin/photos/file?${query}`, {headers: {Accept: item.type}});
     const url = URL.createObjectURL(await response.blob());
     state.urls.push(url);
     if (preview) return url;

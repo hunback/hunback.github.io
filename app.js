@@ -677,83 +677,6 @@
   const guestFiles = $('#guest-files');
   const uploadTypes = {'heic':'image/heic','heif':'image/heif','mov':'video/quicktime','jpg':'image/jpeg','jpeg':'image/jpeg','png':'image/png','webp':'image/webp','mp4':'video/mp4'};
   function selectedType(file) { return file.type || uploadTypes[file.name.split('.').at(-1).toLowerCase()] || ''; }
-  const canvasBlob = (canvas, type, quality) => new Promise(resolve => canvas.toBlob(resolve, type, quality));
-  async function imageSource(file) {
-    if ('createImageBitmap' in window) {
-      try { return await createImageBitmap(file, {imageOrientation: 'from-image'}); }
-      catch (_) { /* Fall back to an HTML image on older Safari versions. */ }
-    }
-    const url = URL.createObjectURL(file), image = new Image();
-    try { image.src = url; await image.decode(); return image; }
-    finally { URL.revokeObjectURL(url); }
-  }
-  async function optimizePhoto(file) {
-    const source = await imageSource(file);
-    try {
-      const width = source.naturalWidth || source.width, height = source.naturalHeight || source.height;
-      if (!width || !height) throw new Error('사진 크기를 읽지 못했습니다.');
-      const longest = Math.max(width, height);
-      if (longest <= 2560 && file.size <= 6 * 1024 * 1024 && file.type === 'image/jpeg')
-        return {body: file, type: 'image/jpeg', optimized: false};
-      const scale = Math.min(1, 2560 / longest);
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.max(1, Math.round(width * scale)); canvas.height = Math.max(1, Math.round(height * scale));
-      const context = canvas.getContext('2d', {alpha: false});
-      if (!context) throw new Error('사진 변환을 시작하지 못했습니다.');
-      context.fillStyle = '#fff'; context.fillRect(0, 0, canvas.width, canvas.height);
-      context.imageSmoothingEnabled = true; context.imageSmoothingQuality = 'high';
-      context.drawImage(source, 0, 0, canvas.width, canvas.height);
-      let quality = .90, blob = await canvasBlob(canvas, 'image/jpeg', quality);
-      while (blob && blob.size > 8 * 1024 * 1024 && quality > .82) {
-        quality = Math.max(.82, quality - .02); blob = await canvasBlob(canvas, 'image/jpeg', quality);
-      }
-      if (!blob) throw new Error('사진 변환을 완료하지 못했습니다.');
-      if (blob.size >= file.size && file.size <= 20 * 1024 * 1024)
-        return {body: file, type: selectedType(file), optimized: false};
-      return {body: blob, type: 'image/jpeg', optimized: true};
-    } finally { source.close?.(); }
-  }
-  let videoEncoderTask, videoEncoder, encodingLabel = '';
-  function loadScript(src) {
-    return new Promise((resolve, reject) => {
-      const existing = document.querySelector(`script[src="${src}"]`);
-      if (existing) { if (window.FFmpegWASM) resolve(); else existing.addEventListener('load', resolve, {once:true}); return; }
-      const script = document.createElement('script'); script.src = src; script.onload = resolve; script.onerror = reject; document.head.append(script);
-    });
-  }
-  async function getVideoEncoder() {
-    if (!videoEncoderTask) videoEncoderTask = (async () => {
-      await loadScript('assets/ffmpeg/ffmpeg.js');
-      const ffmpeg = new window.FFmpegWASM.FFmpeg();
-      ffmpeg.on('progress', ({progress}) => {
-        if (encodingLabel && Number.isFinite(progress)) $('#upload-status').textContent = `${encodingLabel} · ${Math.max(1, Math.min(99, Math.round(progress * 100)))}%`;
-      });
-      await ffmpeg.load({coreURL:'assets/ffmpeg/ffmpeg-core.js',wasmURL:'assets/ffmpeg/ffmpeg-core.wasm'});
-      videoEncoder = ffmpeg; return ffmpeg;
-    })().catch(error => { videoEncoderTask = null; throw error; });
-    return videoEncoderTask;
-  }
-  async function optimizeVideo(file, position) {
-    if (file.type === 'video/mp4' && file.size <= 18 * 1024 * 1024)
-      return {body:file,type:'video/mp4',optimized:false};
-    encodingLabel = `${position} 고화질 영상 최적화 중`;
-    const ffmpeg = await getVideoEncoder();
-    const id = crypto.randomUUID().replaceAll('-', ''), extension = file.type === 'video/quicktime' ? 'mov' : 'mp4';
-    const input = `${id}.${extension}`, output = `${id}-optimized.mp4`;
-    try {
-      await ffmpeg.writeFile(input, new Uint8Array(await file.arrayBuffer()));
-      const code = await ffmpeg.exec(['-i',input,'-vf','scale=1920:1920:force_original_aspect_ratio=decrease:force_divisible_by=2','-c:v','libx264','-preset','veryfast','-crf','20','-profile:v','high','-pix_fmt','yuv420p','-c:a','aac','-b:a','160k','-ar','48000','-movflags','+faststart',output], 300000);
-      if (code !== 0) throw new Error('영상 변환을 완료하지 못했습니다.');
-      const data = await ffmpeg.readFile(output), blob = new Blob([data.buffer], {type:'video/mp4'});
-      if (!blob.size) throw new Error('영상 변환 결과가 비어 있습니다.');
-      if (blob.size >= file.size && file.size <= 95 * 1024 * 1024) return {body:file,type:selectedType(file),optimized:false};
-      return {body:blob,type:'video/mp4',optimized:true};
-    } finally {
-      encodingLabel = '';
-      try { await ffmpeg.deleteFile(input); } catch (_) {}
-      try { await ffmpeg.deleteFile(output); } catch (_) {}
-    }
-  }
   async function uploadSelectedFiles() {
     if (!state.api || ![...guestFiles.files].length || guestFiles.disabled) return;
     const files = [...guestFiles.files];
@@ -768,24 +691,10 @@
         $('#upload-status').textContent = `${file.name}: 이 파일은 휴대폰에서 안전하게 처리하기 어렵습니다.`;
         break;
       }
-      let prepared = {body: file, type: originalType, optimized: false};
-      if (originalType.startsWith('image/')) {
-        $('#upload-status').textContent = `${sent + 1}/${files.length} 고화질 최적화 중 · ${file.name}`;
-        try { prepared = await optimizePhoto(file); }
-        catch (error) {
-          if (file.size > 20 * 1024 * 1024) { $('#upload-status').textContent = `${file.name}: ${error.message}`; break; }
-        }
-      } else {
-        try { prepared = await optimizeVideo(file, `${sent + 1}/${files.length}`); }
-        catch (_) { prepared = {body:file,type:originalType,optimized:false}; }
-      }
-      if (prepared.body.size > (prepared.type.startsWith('video/') ? 95 : 25) * 1024 * 1024) {
-        $('#upload-status').textContent = `${file.name}: 이 파일은 전송 가능한 크기로 줄이지 못했습니다.`; break;
-      }
       $('#upload-status').textContent = `${sent + 1}/${files.length} 업로드 중 · ${file.name}`;
       const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 300000);
       try {
-        const response = await fetch(`${apiBase}/api/photos`, {method:'POST',body:prepared.body,headers:{'Content-Type':prepared.type,'Accept':'application/json','X-Upload-Name':encodeURIComponent(file.name),'X-Original-Size':String(file.size),'X-Optimized':prepared.optimized?'1':'0'},credentials:'omit',cache:'no-store',signal:controller.signal});
+        const response = await fetch(`${apiBase}/api/photos`, {method:'POST',body:file,headers:{'Content-Type':originalType,'Accept':'application/json','X-Upload-Name':encodeURIComponent(file.name),'X-Original-Size':String(file.size),'X-Optimized':'0'},credentials:'omit',cache:'no-store',signal:controller.signal});
         const result = await response.json();
         if (!response.ok || result.ok !== true) throw new Error(result.error || '파일을 전달하지 못했습니다.');
         sent++;
