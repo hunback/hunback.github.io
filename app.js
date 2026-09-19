@@ -680,13 +680,13 @@
   async function uploadSelectedFiles() {
     if (!state.api || ![...guestFiles.files].length || guestFiles.disabled) return;
     const files = [...guestFiles.files];
-    if (files.length > 5) { $('#upload-status').textContent = '한 번에는 5개씩 올려주세요.'; guestFiles.value=''; return; }
+    if (files.length > 20) { $('#upload-status').textContent = '한 번에는 20개씩 올려주세요.'; guestFiles.value=''; return; }
     guestFiles.disabled = true;
     try {
     let sent = 0;
     for (const file of files) {
       const originalType = selectedType(file);
-      const originalMax = originalType.startsWith('video/') ? 95 * 1024 * 1024 : 80 * 1024 * 1024;
+      const originalMax = 95 * 1024 * 1024;
       if (!originalType || !['image/jpeg','image/png','image/webp','image/heic','image/heif','video/mp4','video/quicktime'].includes(originalType) || file.size < 12 || file.size > originalMax) {
         $('#upload-status').textContent = `${file.name}: 이 파일은 휴대폰에서 안전하게 처리하기 어렵습니다.`;
         break;
