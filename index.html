@@ -19,12 +19,12 @@
   <meta property="og:image:height" content="2000">
   <link id="webfonts" rel="stylesheet" href="invitation-fonts.css?v=20260919-reference-audit">
   <link rel="stylesheet" href="styles.css?v=20260913-garden-complete">
-  <link rel="stylesheet" href="design.css?v=20260919-cover-heart">
+  <link rel="stylesheet" href="design.css?v=20260919-mobile-layout">
   <script src="config.js?v=20260919-reference-pass" defer></script>
   <script src="photos.js" defer></script>
 <script src="design-data.js?v=20260919-reference-audit" defer></script>
   <script src="apply-content.js?v=20260919-reference-audit" defer></script>
-  <script src="app.js?v=20260919-reference-final" defer></script>
+  <script src="app.js?v=20260919-mobile-layout" defer></script>
   <script src="design-audio.js?v=20260914-audio" defer></script>
   <script src="naver-map.js?v=20260919-reference-pass" defer></script>
 </head>
@@ -33,7 +33,7 @@
 
 <section id="intro-gate" class="intro-gate" aria-label="우리의 하루 도입 영상" hidden>
   <div class="intro-stage">
-    <video id="intro-video" width="720" height="1280" muted playsinline preload="auto" disablepictureinpicture disableremoteplayback controlslist="nodownload nofullscreen noremoteplayback">
+    <video id="intro-video" width="720" height="1280" muted autoplay playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback controlslist="nodownload nofullscreen noremoteplayback">
       <source src="assets/video/intro-smooth-20260913.mp4" type="video/mp4">
     </video>
     <button id="intro-retry" class="intro-retry" type="button" hidden>영상 시작하기</button>
@@ -91,16 +91,16 @@
           <p class="profile-role">신랑</p>
           <h3 id="groom-profile-name" class="profile-name">박훈백</h3>
           <p class="profile-name-en" lang="en">hunback</p>
-          <p id="groom-profile-copy" class="profile-intro">바라만 보아도 저절로 미소 짓게 하고<br>지친 하루 끝엔 따뜻한 쉼이 되어주는<br>그녀와 평생을 함께하려 합니다.</p>
         </div>
+        <p id="groom-profile-copy" class="profile-intro">바라만 보아도 저절로 미소 짓게 하고<br>지친 하루 끝엔 따뜻한 쉼이 되어주는<br>그녀와 평생을 함께하려 합니다.</p>
       </article>
       <article class="profile-card profile-bride" aria-labelledby="bride-profile-name">
         <div class="profile-copy">
           <p class="profile-role">신부</p>
           <h3 id="bride-profile-name" class="profile-name">최지우</h3>
           <p class="profile-name-en" lang="en">Jiwoo</p>
-          <p id="bride-profile-copy" class="profile-intro">사소한 일상도 기쁨으로 물들일 줄 알고<br>언제나 묵묵하고 든든한 버팀목처럼<br>필요한 순간 늘 먼저 손 내밀어 주는<br>사람과 평생을 함께하려 합니다.</p>
         </div>
+        <p id="bride-profile-copy" class="profile-intro">사소한 일상도 기쁨으로 물들일 줄 알고<br>언제나 묵묵하고 든든한 버팀목처럼<br>필요한 순간 늘 먼저 손 내밀어 주는<br>사람과 평생을 함께하려 합니다.</p>
         <figure class="profile-portrait protected-media">
           <img id="bride-profile-image" src="assets/photos/selected-24.webp" width="1200" height="1800" alt="지우의 프로필 사진" loading="lazy" decoding="async" draggable="false">
         </figure>
@@ -205,12 +205,14 @@
   </figure>
   <footer class="ending reveal">
 
-    <button class="kakao-share-button" id="share-link" type="button"><svg class="kakao-symbol" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="4" fill="#FEE500"/><path d="M12 5.3c-4.2 0-7.5 2.6-7.5 5.8 0 2.1 1.4 3.9 3.5 4.9l-.8 2.8 3.3-2.2c.5.1 1 .1 1.5.1 4.2 0 7.5-2.6 7.5-5.7S16.2 5.3 12 5.3Z" fill="#3C1F1E"/></svg> 카카오톡으로 초대장 보내기</button>
     <p class="share-hint sr-only" role="status">공유 메뉴에서 카카오톡을 선택해 주세요.</p>
     <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false" hidden>움직임 줄이기</button>
     <p class="local-status" id="local-status" hidden>시안 보기 · 저장 내용은 이 기기에만 보관</p>
   </footer>
 </main>
+<div class="share-dock">
+    <button class="kakao-share-button" id="share-link" type="button"><svg class="kakao-symbol" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="4" fill="#FEE500"/><path d="M12 5.3c-4.2 0-7.5 2.6-7.5 5.8 0 2.1 1.4 3.9 3.5 4.9l-.8 2.8 3.3-2.2c.5.1 1 .1 1.5.1 4.2 0 7.5-2.6 7.5-5.7S16.2 5.3 12 5.3Z" fill="#3C1F1E"/></svg> 카카오톡으로 초대장 보내기</button>
+</div>
 <div id="music" class="music-fab-wrap" aria-label="배경 음악">
   <button id="bgm-toggle" class="music-fab" type="button" disabled>♪ 음악 켜기</button>
   <audio id="bgm-audio" preload="none"></audio>

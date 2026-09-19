@@ -150,7 +150,7 @@
     if (reduced.matches) finishIntro(true);
     else {
       try {
-        if (video.currentTime < .02 && Number.isFinite(video.duration)) video.currentTime = Math.min(.04, video.duration / 20);
+        if (video.paused && video.currentTime < .02 && Number.isFinite(video.duration)) video.currentTime = Math.min(.04, video.duration / 20);
       } catch (_) { /* Some mobile browsers do not allow a seek before playback. */ }
       playIntro();
     }
@@ -158,23 +158,25 @@
   if (video) {
     video.muted = true;
     video.playsInline = true;
-    video.autoplay = false;
-    video.removeAttribute('autoplay');
+    video.defaultMuted = true;
+    video.autoplay = true;
+    video.setAttribute('muted', '');
     video.loop = false;
     video.addEventListener('loadeddata', readyIntro, { once: true });
     video.addEventListener('canplay', readyIntro, { once: true });
     video.addEventListener('ended', () => finishIntro(true));
-    video.addEventListener('error', () => finishIntro(true));
+    video.addEventListener('error', () => { if (!introFinished && retry) { retry.textContent = '영상 다시 불러오기'; retry.hidden = false; } });
     // A failed download must never leave guests trapped behind the opening.
-    $('source', video)?.addEventListener('error', () => finishIntro(true));
+    $('source', video)?.addEventListener('error', () => { if (!introFinished && retry) { retry.textContent = '영상 다시 불러오기'; retry.hidden = false; } });
     video.addEventListener('waiting', () => {
       introGate?.classList.remove('is-ready');
       clearTimeout(exitTimer);
       clearTimeout(stallTimer);
-      stallTimer = window.setTimeout(() => finishIntro(true), 2500);
+      stallTimer = window.setTimeout(() => { if (!introFinished && retry) retry.hidden = false; }, 8000);
     });
     video.addEventListener('playing', () => {
-      clearTimeout(stallTimer);
+      clearTimeout(stallTimer); clearTimeout(loadingTimer);
+      if (retry) retry.hidden = true;
       introGate?.classList.add('is-ready');
       scheduleIntroExit();
     });
@@ -182,7 +184,7 @@
       if (Number.isFinite(video.duration) && video.duration - video.currentTime <= introFadeOutMs / 1000) finishIntro();
     });
   }
-  retry?.addEventListener('click', playIntro);
+  retry?.addEventListener('click', () => { if (video?.error || video?.networkState === 3) video.load(); playIntro(); });
   introSkip?.addEventListener('click', () => finishIntro(true));
   reduced.addEventListener?.('change', event => { if (event.matches) finishIntro(true); });
   if (!media || media.introEnabled !== false) {
@@ -191,7 +193,9 @@
       introGate.hidden = false;
       document.body.classList.add('intro-active');
       main.inert = true;
-      loadingTimer = window.setTimeout(() => finishIntro(true), 6000);
+      loadingTimer = window.setTimeout(() => { if (!introFinished && retry) retry.hidden = false; }, 8000);
+      video.load();
+      playIntro();
       if (video.readyState >= 2) readyIntro();
       if (video.ended) finishIntro();
     }
