@@ -62,7 +62,7 @@ h1, h2, h3, strong { font-weight: 400; }
 .cover-date-top { color: var(--mobile-lavender); font: 500 10px/1.2 Montserrat, sans-serif; letter-spacing: .17em; }
 .cover .cover-title { position: relative; z-index: 1; margin: 14px 0 21px; color: var(--mobile-ink); font: 400 clamp(43px, 13vw, 57px)/.76 var(--mobile-hand) !important; letter-spacing: .01em; }
 .cover .cover-title span { color: var(--mobile-lavender); }
-.cover-heart { display: inline-block; width: .43em; height: .41em; margin: 0 .09em .015em 0; overflow: visible; fill: none; stroke: #D9828A; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; transform: rotate(-3deg); vertical-align: middle; }
+.cover-heart { display: inline-block; width: .82em; height: .78em; margin: 0 .07em .015em 0; overflow: visible; fill: none; stroke: #D9828A; stroke-width: .85; stroke-linecap: round; stroke-linejoin: round; transform: rotate(-3deg); vertical-align: middle; }
 .cover-heart-detail { opacity: .48; stroke-width: .72; }
 .cover-hero { position: relative; margin: 0 auto; overflow: hidden; border: 0; border-radius: 0 !important; background: var(--mobile-soft); }
 .cover-hero img { width: 100%; height: min(422px, calc((100vw - 108px) * 1.25)); aspect-ratio: 4/5; object-fit: cover; object-position: 50% 55%; }
