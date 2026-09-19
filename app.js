@@ -96,6 +96,7 @@
   const media = window.WEDDING_MEDIA || window.DESIGN_CONTENT?.media || {};
   const introFadeInMs = 650;
   const introFadeOutMs = 850;
+  let manualIntro = false;
   let introFinished = false; let introReady = false; let introExiting = false;
   let loadingTimer; let stallTimer; let exitTimer;
   function removeIntroGate() {
@@ -147,7 +148,7 @@
     if (introReady || introFinished || !video || !introGate) return;
     introReady = true;
     clearTimeout(loadingTimer);
-    if (reduced.matches) finishIntro(true);
+    if (reduced.matches && !manualIntro) finishIntro(true);
     else {
       try {
         if (video.paused && video.currentTime < .02 && Number.isFinite(video.duration)) video.currentTime = Math.min(.04, video.duration / 20);
@@ -186,6 +187,13 @@
   }
   retry?.addEventListener('click', () => { if (video?.error || video?.networkState === 3) video.load(); playIntro(); });
   introSkip?.addEventListener('click', () => finishIntro(true));
+  $('#intro-open')?.addEventListener('click', () => {
+    manualIntro = true; introFinished = false; introExiting = false; introReady = false;
+    introGate.classList.remove('is-ready', 'is-leaving'); introGate.hidden = false;
+    document.body.classList.add('intro-active'); main.inert = true;
+    video.currentTime = 0; playIntro();
+  });
+  if (media.introEnabled === false) $('#intro-open').hidden = true;
   reduced.addEventListener?.('change', event => { if (event.matches) finishIntro(true); });
   if (!media || media.introEnabled !== false) {
     if (!video || !introGate || !main || location.hash || reduced.matches) finishIntro(true);

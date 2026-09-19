@@ -411,3 +411,5 @@ body { padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
 .music-fab-wrap { bottom: calc(88px + env(safe-area-inset-bottom)); }
 .intro-skip, .intro-retry { bottom: calc(92px + env(safe-area-inset-bottom)); }
 @media print { .share-dock { display: none; } body { padding-bottom: 0; } }
+
+.intro-open { grid-column: 1 / -1; justify-self: center; margin-top: 8px; min-height: 44px; padding: 8px 14px; color: var(--mobile-muted); font-size: 11px; text-decoration: underline; text-underline-offset: 4px; }
