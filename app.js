@@ -94,11 +94,40 @@
   const video = $('#intro-video'); const introGate = $('#intro-gate'); const retry = $('#intro-retry');
   const main = $('#wedding'); const introSkip = $('#intro-skip');
   const media = window.WEDDING_MEDIA || window.DESIGN_CONTENT?.media || {};
+  const introSource = video ? $('source', video) : null;
+  const mobileIntroSource = typeof media.introMobileSource === 'string' && media.introMobileSource.trim()
+    ? media.introMobileSource.trim() : 'assets/video/intro-mobile-20260920.mp4';
+  const mobileIntroPoster = typeof media.introMobilePoster === 'string' && media.introMobilePoster.trim()
+    ? media.introMobilePoster.trim() : 'assets/video/intro-mobile-poster-20260920.jpg';
   const introFadeInMs = 650;
   const introFadeOutMs = 850;
+  const introRecoveryMs = 4500;
   let manualIntro = false;
   let introFinished = false; let introReady = false; let introExiting = false;
-  let loadingTimer; let stallTimer; let exitTimer;
+  let loadingTimer; let stallTimer; let exitTimer; let introPlayTask;
+  function useMobileIntro() {
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    const effectiveType = String(connection?.effectiveType || '').toLowerCase();
+    const downlink = Number(connection?.downlink);
+    const constrained = Boolean(connection?.saveData) || ['slow-2g', '2g'].includes(effectiveType)
+      || (Number.isFinite(downlink) && downlink > 0 && downlink < 1.5);
+    return window.innerWidth <= 768 || constrained;
+  }
+  if (video) {
+    // The HTML fallback keeps the source discoverable, while the deferred app
+    // replaces it before the app-controlled load on mobile/slow links.
+    video.preload = 'none';
+    video.autoplay = false;
+    if (useMobileIntro() && introSource && mobileIntroSource) {
+      introSource.src = mobileIntroSource;
+      video.poster = mobileIntroPoster;
+    }
+  }
+  function showIntroRetry(label = '영상 시작하기') {
+    if (introFinished || !retry) return;
+    retry.textContent = label;
+    retry.hidden = false;
+  }
   function removeIntroGate() {
     if (introFinished) return;
     introFinished = true;
@@ -125,7 +154,7 @@
     introGate.classList.add('is-leaving');
     introGate.addEventListener('transitionend', event => {
       if (event.target === introGate && event.propertyName === 'opacity') removeIntroGate();
-    });
+    }, { once: true });
     exitTimer = window.setTimeout(removeIntroGate, introFadeOutMs + 80);
   }
   function scheduleIntroExit() {
@@ -134,15 +163,22 @@
     const delay = Math.max(0, (video.duration - video.currentTime - introFadeOutMs / 1000) * 1000);
     exitTimer = window.setTimeout(() => finishIntro(), delay);
   }
-  async function playIntro() {
+  function playIntro() {
     if (introFinished || !video) return;
+    if (introPlayTask) return introPlayTask;
     if (retry) retry.hidden = true;
-    try {
-      await video.play();
-      if (introFinished) video.pause();
-      else scheduleIntroExit();
-    }
-    catch (_) { if (!introFinished && retry) retry.hidden = false; }
+    introPlayTask = (async () => {
+      try {
+        await video.play();
+        if (introFinished) video.pause();
+        else scheduleIntroExit();
+        return true;
+      } catch (_) {
+        showIntroRetry('영상 시작하기');
+        return false;
+      }
+    })().finally(() => { introPlayTask = null; });
+    return introPlayTask;
   }
   function readyIntro() {
     if (introReady || introFinished || !video || !introGate) return;
@@ -160,21 +196,25 @@
     video.muted = true;
     video.playsInline = true;
     video.defaultMuted = true;
-    video.autoplay = true;
     video.setAttribute('muted', '');
     video.loop = false;
     video.addEventListener('loadeddata', readyIntro, { once: true });
     video.addEventListener('canplay', readyIntro, { once: true });
     video.addEventListener('ended', () => finishIntro(true));
-    video.addEventListener('error', () => { if (!introFinished && retry) { retry.textContent = '영상 다시 불러오기'; retry.hidden = false; } });
+    const introError = () => showIntroRetry('영상 다시 불러오기');
+    video.addEventListener('error', introError);
     // A failed download must never leave guests trapped behind the opening.
-    $('source', video)?.addEventListener('error', () => { if (!introFinished && retry) { retry.textContent = '영상 다시 불러오기'; retry.hidden = false; } });
-    video.addEventListener('waiting', () => {
+    introSource?.addEventListener('error', introError);
+    const scheduleIntroRecovery = () => {
       introGate?.classList.remove('is-ready');
       clearTimeout(exitTimer);
       clearTimeout(stallTimer);
-      stallTimer = window.setTimeout(() => { if (!introFinished && retry) retry.hidden = false; }, 8000);
-    });
+      stallTimer = window.setTimeout(() => {
+        if (!introFinished) showIntroRetry(video.currentTime > 0 ? '영상이 느려요 · 다시 시도' : '영상 시작하기');
+      }, introRecoveryMs);
+    };
+    video.addEventListener('waiting', scheduleIntroRecovery);
+    video.addEventListener('stalled', scheduleIntroRecovery);
     video.addEventListener('playing', () => {
       clearTimeout(stallTimer); clearTimeout(loadingTimer);
       if (retry) retry.hidden = true;
@@ -185,12 +225,18 @@
       if (Number.isFinite(video.duration) && video.duration - video.currentTime <= introFadeOutMs / 1000) finishIntro();
     });
   }
-  retry?.addEventListener('click', () => { if (video?.error || video?.networkState === 3) video.load(); playIntro(); });
+  retry?.addEventListener('click', () => {
+    if (!video) return;
+    if (video.error || video.networkState === 3) video.load();
+    playIntro();
+  });
   introSkip?.addEventListener('click', () => finishIntro(true));
   $('#intro-open')?.addEventListener('click', () => {
+    if (!video || !introGate || !main) return;
     manualIntro = true; introFinished = false; introExiting = false; introReady = false;
     introGate.classList.remove('is-ready', 'is-leaving'); introGate.hidden = false;
     document.body.classList.add('intro-active'); main.inert = true;
+    if (video.readyState === 0) video.load();
     video.currentTime = 0; playIntro();
   });
   if (media.introEnabled === false) $('#intro-open').hidden = true;
@@ -201,7 +247,7 @@
       introGate.hidden = false;
       document.body.classList.add('intro-active');
       main.inert = true;
-      loadingTimer = window.setTimeout(() => { if (!introFinished && retry) retry.hidden = false; }, 8000);
+      loadingTimer = window.setTimeout(() => showIntroRetry('영상 시작하기'), introRecoveryMs);
       video.load();
       playIntro();
       if (video.readyState >= 2) readyIntro();
@@ -352,7 +398,6 @@
   let photoGesture = null;
   let photoAnimation;
   let photoLoadingTimer;
-  const adjacentPhotos = [new Image(), new Image()];
   function photoSource(photo) {
     return asset(`assets/photos/photo-${String(photo.id).padStart(2,'0')}.webp`);
   }
@@ -360,7 +405,7 @@
     clearTimeout(photoLoadingTimer);
     photoRetry.hidden = true; photoLoadStatus.hidden = true;
     photoStage.setAttribute('aria-busy', 'true');
-    enlargedPhoto.alt = alt; enlargedPhoto.src = source;
+    enlargedPhoto.alt = alt; enlargedPhoto.fetchPriority = 'high'; enlargedPhoto.src = source;
     if (!enlargedPhoto.complete) photoLoadingTimer = window.setTimeout(() => {
       photoLoadStatus.textContent = '사진을 불러오고 있습니다.'; photoLoadStatus.hidden = false;
     }, 350);
@@ -389,7 +434,6 @@
         {opacity:1, transform:'translateX(0)'}
       ], {duration:220, easing:'ease-out'});
     }
-    [-1,1].forEach((offset,i) => {adjacentPhotos[i].src = photoSource(photos[(activePhotoIndex + offset + photos.length) % photos.length]);});
   }
   function changePhoto(direction) {
     if (activePhotoIndex >= 0 && photos.length > 1) showGalleryPhoto(activePhotoIndex + direction, direction);
@@ -440,10 +484,9 @@
       figure.style.setProperty('--reveal-delay', `${index % 2 * 90}ms`);
       const button = node('button', 'gallery-photo protected-media'); button.type = 'button';
       button.setAttribute('aria-label', `${photo.alt} 크게 보기`);
-      const img = node('img'); const stem = `assets/photos/photo-${String(photo.id).padStart(2,'0')}`; img.src = asset(`${stem}-small.webp`);
-      if (!window.WEDDING_ASSET_MAP) img.srcset = `${stem}-small.webp 560w, ${stem}.webp 1200w`;
-      img.sizes = '(max-width: 430px) calc((100vw - 44px) / 2), 194px';
-      img.alt = photo.alt; img.width = photo.width; img.height = photo.height; img.style.setProperty('--photo-ratio', `${photo.width} / ${photo.height}`); img.loading = 'lazy'; img.decoding = 'async'; img.draggable = false;
+      const img = node('img'); const stem = `assets/photos/photo-${String(photo.id).padStart(2,'0')}`;
+      img.src = window.WEDDING_ASSET_MAP ? asset(`${stem}-small.webp`) : `${stem}-small.webp`;
+      img.alt = photo.alt; img.width = photo.width; img.height = photo.height; img.style.setProperty('--photo-ratio', `${photo.width} / ${photo.height}`); img.loading = 'lazy'; img.decoding = 'async'; img.fetchPriority = 'low'; img.draggable = false;
       button.append(img); button.addEventListener('click', () => openPhoto(photo)); figure.append(button);
       return figure;
   }

@@ -20,14 +20,15 @@
   }
 
   if (!configuredPath || !localAsset(configuredPath)) {
-    if (panel) panel.hidden = true;
+    toggle.setAttribute('aria-label', '배경 음악 준비 중'); toggle.title = '배경 음악 준비 중'; toggle.disabled = true;
+    toggle.addEventListener('click', () => { status.textContent = '배경 음악을 준비 중입니다.'; });
     return;
   }
 
   audio.src = localAsset(configuredPath);
   audio.load();
   toggle.disabled = false;
-  toggle.textContent = '♪ 음악 켜기';
+  toggle.setAttribute('aria-label', '배경 음악 켜기'); toggle.setAttribute('aria-pressed', 'false');
 
   toggle.addEventListener('click', async () => {
     if (audio.paused) {
@@ -35,8 +36,8 @@
       catch (_) { status.textContent = '음악을 재생하지 못했습니다.'; }
     } else audio.pause();
   });
-  audio.addEventListener('play', () => { toggle.textContent = '♪ 음악 끄기'; status.textContent = '음악을 재생 중입니다.'; });
-  audio.addEventListener('pause', () => { toggle.textContent = '♪ 음악 켜기'; status.textContent = '음악이 멈춰 있습니다.'; });
-  audio.addEventListener('ended', () => { toggle.textContent = '♪ 음악 켜기'; status.textContent = '음악 재생이 끝났습니다.'; });
+  audio.addEventListener('play', () => { toggle.setAttribute('aria-label', '배경 음악 끄기'); toggle.setAttribute('aria-pressed', 'true'); status.textContent = '음악을 재생 중입니다.'; });
+  audio.addEventListener('pause', () => { toggle.setAttribute('aria-label', '배경 음악 켜기'); toggle.setAttribute('aria-pressed', 'false'); status.textContent = '음악이 멈춰 있습니다.'; });
+  audio.addEventListener('ended', () => { toggle.setAttribute('aria-label', '배경 음악 켜기'); toggle.setAttribute('aria-pressed', 'false'); status.textContent = '음악 재생이 끝났습니다.'; });
   audio.addEventListener('error', () => { toggle.disabled = true; status.textContent = '음악을 불러오지 못했습니다.'; });
 })();

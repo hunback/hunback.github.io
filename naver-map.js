@@ -79,7 +79,17 @@
       }
     } catch (_) { fail(); }
   };
-  container.dataset.mapState = 'loading';
-  timer = setTimeout(fail, 12000);
-  document.head.append(script);
+  function loadMap() {
+    container.dataset.mapState = 'loading';
+    timer = setTimeout(fail, 12000);
+    document.head.append(script);
+  }
+  container.dataset.mapState = 'waiting';
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      if (!entries.some(entry => entry.isIntersecting)) return;
+      observer.disconnect(); loadMap();
+    }, {rootMargin: '350px'});
+    observer.observe(container);
+  } else loadMap();
 })();
