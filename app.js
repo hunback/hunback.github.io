@@ -96,7 +96,7 @@
   const media = window.WEDDING_MEDIA || window.DESIGN_CONTENT?.media || {};
   const introSource = video ? $('source', video) : null;
   const mobileIntroSource = typeof media.introMobileSource === 'string' && media.introMobileSource.trim()
-    ? media.introMobileSource.trim() : 'assets/video/intro-mobile-20260920.mp4';
+    ? media.introMobileSource.trim() : 'assets/video/intro-final.mp4';
   const mobileIntroPoster = typeof media.introMobilePoster === 'string' && media.introMobilePoster.trim()
     ? media.introMobilePoster.trim() : 'assets/video/intro-mobile-poster-20260920.jpg';
   const introFadeInMs = 650;
@@ -214,7 +214,8 @@
       }, introRecoveryMs);
     };
     video.addEventListener('waiting', scheduleIntroRecovery);
-    video.addEventListener('stalled', scheduleIntroRecovery);
+    // A network stall does not mean buffered playback has stopped.
+    video.addEventListener('stalled', () => { if (video.readyState < 3) scheduleIntroRecovery(); });
     video.addEventListener('playing', () => {
       clearTimeout(stallTimer); clearTimeout(loadingTimer);
       if (retry) retry.hidden = true;
@@ -242,7 +243,7 @@
   if (media.introEnabled === false) $('#intro-open').hidden = true;
   reduced.addEventListener?.('change', event => { if (event.matches) finishIntro(true); });
   if (!media || media.introEnabled !== false) {
-    if (!video || !introGate || !main || location.hash || reduced.matches) finishIntro(true);
+    if (!video || !introGate || !main || reduced.matches) finishIntro(true);
     else {
       introGate.hidden = false;
       document.body.classList.add('intro-active');

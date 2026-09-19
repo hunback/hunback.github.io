@@ -9,7 +9,7 @@
   const content = window.DESIGN_CONTENT || {};
   const media = content.media && typeof content.media === 'object' ? content.media : {};
   const configuredPath = typeof media.bgm === 'string' ? media.bgm.trim() : '';
-  audio.volume = .14;
+  audio.volume = .4;
 
   function localAsset(path) {
     if (!path || /^(?:[a-z]+:)?\/\//i.test(path)) return '';
@@ -27,7 +27,8 @@
 
   audio.src = localAsset(configuredPath);
   audio.loop = true;
-  audio.preload = 'none';
+  audio.preload = 'auto';
+  audio.autoplay = true;
   toggle.disabled = false;
   let wantsMusic = true;
   let starting = null;
@@ -52,6 +53,8 @@
     start();
   }
   document.addEventListener('pointerdown', unlock, {passive: true});
+  document.addEventListener('touchend', unlock, {passive: true});
+  document.addEventListener('click', unlock);
   document.addEventListener('keydown', unlock);
   toggle.addEventListener('click', () => {
     if (!audio.paused || starting) {
