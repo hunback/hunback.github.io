@@ -404,12 +404,14 @@ body.photo-open { overflow: hidden; }
 .profile-groom .profile-copy { grid-column: 2; grid-row: 1; }
 .profile-list { gap: 52px; }
 .letter-copy { white-space: nowrap; font-size: clamp(12px, 3.6vw, 14px); }
-body { padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
-.share-dock { position: fixed; z-index: 1010; bottom: 0; left: 50%; transform: translateX(-50%); width: min(100%, 430px); padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(250,250,250,.97); border-top: 1px solid #e9e3e5; }
-.share-dock .kakao-share-button { display: flex; width: 100%; min-height: 48px; padding: 10px 14px; border-radius: 8px; background: #FEE500; color: #392920; font-size: 13px; gap: 8px; }
-.toast { bottom: calc(88px + env(safe-area-inset-bottom)); }
-.music-fab-wrap { bottom: calc(88px + env(safe-area-inset-bottom)); }
-.intro-skip, .intro-retry { bottom: calc(92px + env(safe-area-inset-bottom)); }
-@media print { .share-dock { display: none; } body { padding-bottom: 0; } }
+/* Compact share control; the full button remains in the page footer. */
+.share-floating { position: fixed; z-index: 1010; right: max(16px, calc((100vw - 430px) / 2 + 16px)); bottom: calc(18px + env(safe-area-inset-bottom)); width: 48px; height: 48px; padding: 12px; border-radius: 50%; background: #FEE500; box-shadow: 0 3px 14px #33281b20; }
+.share-floating .kakao-symbol { width: 24px; height: 24px; }
+.ending .kakao-share-button { display: flex; width: 100%; min-height: 48px; padding: 12px 16px; border-radius: 8px; background: #FEE500; color: #392920; font-size: 13px; gap: 8px; }
+.ending { padding-bottom: calc(30px + env(safe-area-inset-bottom)); }
+.toast { bottom: calc(78px + env(safe-area-inset-bottom)); }
+.music-fab-wrap { bottom: calc(78px + env(safe-area-inset-bottom)); }
+.intro-skip, .intro-retry { bottom: calc(80px + env(safe-area-inset-bottom)); }
+@media print { .share-floating { display: none; } }
 
 .intro-open { grid-column: 1 / -1; justify-self: center; margin-top: 8px; min-height: 44px; padding: 8px 14px; color: var(--mobile-muted); font-size: 11px; text-decoration: underline; text-underline-offset: 4px; }

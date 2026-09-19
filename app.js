@@ -307,6 +307,10 @@
     };
     document.head.append(sdk);
   }
+  $('#share-floating').addEventListener('click', () => $('#share-link').click());
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(([entry]) => { $('#share-floating').hidden = entry.isIntersecting && entry.intersectionRatio >= .8; }, {threshold:[0,.8,1]}).observe($('#share-link'));
+  }
   $('#share-link').addEventListener('click', async () => {
     const url = config.canonicalUrl || 'https://hunback.github.io/';
     if (kakaoShareReady) {
@@ -668,7 +672,7 @@
     } else guestSend.disabled = false;
   });
   // All useful sections participate, including controls and dynamically built cards.
-  $$('.section > .map-actions, .transport-list, .calendar-button, .gallery-guide, .guestbook-actions, .account-guide, .rsvp-card, .closing-photo, .ending > p, .ending > #share-link').forEach(el => el.classList.add('reveal'));
+  $$('.section > .map-actions, .transport-list, .calendar-button, .gallery-guide, .guestbook-actions, .account-guide, .rsvp-card, .closing-photo, .ending > p').forEach(el => el.classList.add('reveal'));
   observeReveals();
   const navLinks = $$('.quick-nav a');
   let navFrame = 0;

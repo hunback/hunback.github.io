@@ -19,12 +19,12 @@
   <meta property="og:image:height" content="2000">
   <link id="webfonts" rel="stylesheet" href="invitation-fonts.css?v=20260919-reference-audit">
   <link rel="stylesheet" href="styles.css?v=20260913-garden-complete">
-  <link rel="stylesheet" href="design.css?v=20260919-mobile-final">
+  <link rel="stylesheet" href="design.css?v=20260919-share-compact">
   <script src="config.js?v=20260919-reference-pass" defer></script>
   <script src="photos.js" defer></script>
 <script src="design-data.js?v=20260919-place-links" defer></script>
   <script src="apply-content.js?v=20260919-reference-audit" defer></script>
-  <script src="app.js?v=20260919-mobile-final" defer></script>
+  <script src="app.js?v=20260919-share-compact" defer></script>
   <script src="design-audio.js?v=20260914-audio" defer></script>
   <script src="naver-map.js?v=20260919-place-links" defer></script>
 </head>
@@ -204,16 +204,16 @@
     <img src="assets/photos/selected-28.webp" width="1200" height="1800" alt="푸른 들판에서 서로를 마주 보는 두 사람" loading="lazy" decoding="async" draggable="false">
     <figcaption class="closing-overlay"><p id="ending-overlay-copy">서로의 가장 편안한 안식처가 되어<br>함께 따뜻한 날들을 살아가겠습니다.</p><small>훈백 · 지우</small></figcaption>
   </figure>
-  <footer class="ending reveal">
+  <footer class="ending">
+    <button class="kakao-share-button" id="share-link" type="button"><svg class="kakao-symbol" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="4" fill="#FEE500"/><path d="M12 5.3c-4.2 0-7.5 2.6-7.5 5.8 0 2.1 1.4 3.9 3.5 4.9l-.8 2.8 3.3-2.2c.5.1 1 .1 1.5.1 4.2 0 7.5-2.6 7.5-5.7S16.2 5.3 12 5.3Z" fill="#3C1F1E"/></svg> 카카오톡으로 초대장 보내기</button>
 
     <p class="share-hint sr-only" role="status">공유 메뉴에서 카카오톡을 선택해 주세요.</p>
     <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false" hidden>움직임 줄이기</button>
     <p class="local-status" id="local-status" hidden>시안 보기 · 저장 내용은 이 기기에만 보관</p>
   </footer>
 </main>
-<div class="share-dock">
-    <button class="kakao-share-button" id="share-link" type="button"><svg class="kakao-symbol" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="4" fill="#FEE500"/><path d="M12 5.3c-4.2 0-7.5 2.6-7.5 5.8 0 2.1 1.4 3.9 3.5 4.9l-.8 2.8 3.3-2.2c.5.1 1 .1 1.5.1 4.2 0 7.5-2.6 7.5-5.7S16.2 5.3 12 5.3Z" fill="#3C1F1E"/></svg> 카카오톡으로 초대장 보내기</button>
-</div>
+<button id="share-floating" class="share-floating" type="button" aria-label="카카오톡으로 초대장 보내기"><svg class="kakao-symbol" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="4" fill="#FEE500"/><path d="M12 5.3c-4.2 0-7.5 2.6-7.5 5.8 0 2.1 1.4 3.9 3.5 4.9l-.8 2.8 3.3-2.2c.5.1 1 .1 1.5.1 4.2 0 7.5-2.6 7.5-5.7S16.2 5.3 12 5.3Z" fill="#3C1F1E"/></svg></button>
+
 <div id="music" class="music-fab-wrap" aria-label="배경 음악">
   <button id="bgm-toggle" class="music-fab" type="button" disabled>♪ 음악 켜기</button>
   <audio id="bgm-audio" preload="none"></audio>
