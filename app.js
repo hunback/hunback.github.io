@@ -231,7 +231,7 @@
   function setMotion() {
     const mode = ['full', 'reduce'].includes(motionChoice) ? motionChoice : reduced.matches ? 'reduce' : 'full';
     document.documentElement.dataset.motion = mode;
-    const button = $('#motion-toggle'); button.hidden = false;
+    const button = $('#motion-toggle'); button.hidden = true;
     button.textContent = mode === 'reduce' ? '스크롤 움직임 켜기' : '움직임 줄이기';
     button.setAttribute('aria-pressed', String(mode === 'reduce'));
   }
@@ -326,20 +326,97 @@
     }
   });
 
-  function openPhoto(photo) {
-    const stem = `assets/photos/photo-${String(photo.id).padStart(2,'0')}`;
-    const image = $('#photo-dialog-image');
-    image.src = asset(`${stem}.webp`); image.alt = photo.alt;
-    $('#photo-dialog').showModal();
+  const photoDialog = $('#photo-dialog');
+  const enlargedPhoto = $('#photo-dialog-image');
+  const photoStage = $('.photo-dialog-stage');
+  const photoPosition = $('#photo-position');
+  const photoLoadStatus = $('#photo-load-status');
+  const photoRetry = $('#photo-retry');
+  let activePhotoIndex = -1;
+  let photoGesture = null;
+  let photoAnimation;
+  let photoLoadingTimer;
+  const adjacentPhotos = [new Image(), new Image()];
+  function photoSource(photo) {
+    return asset(`assets/photos/photo-${String(photo.id).padStart(2,'0')}.webp`);
   }
-
+  function loadEnlargedPhoto(source, alt) {
+    clearTimeout(photoLoadingTimer);
+    photoRetry.hidden = true; photoLoadStatus.hidden = true;
+    photoStage.setAttribute('aria-busy', 'true');
+    enlargedPhoto.alt = alt; enlargedPhoto.src = source;
+    if (!enlargedPhoto.complete) photoLoadingTimer = window.setTimeout(() => {
+      photoLoadStatus.textContent = '사진을 불러오고 있습니다.'; photoLoadStatus.hidden = false;
+    }, 350);
+    else if (enlargedPhoto.naturalWidth) photoStage.setAttribute('aria-busy', 'false');
+  }
+  enlargedPhoto.addEventListener('load', () => {
+    clearTimeout(photoLoadingTimer); photoLoadStatus.hidden = true;
+    photoStage.setAttribute('aria-busy', 'false');
+  });
+  enlargedPhoto.addEventListener('error', () => {
+    clearTimeout(photoLoadingTimer); photoStage.setAttribute('aria-busy', 'false');
+    photoLoadStatus.textContent = '사진을 불러오지 못했습니다.'; photoLoadStatus.hidden = false; photoRetry.hidden = false;
+  });
+  photoRetry.addEventListener('click', () => loadEnlargedPhoto(enlargedPhoto.src, enlargedPhoto.alt));
+  function showGalleryPhoto(index, direction = 0) {
+    if (!photos.length) return;
+    activePhotoIndex = (index + photos.length) % photos.length;
+    const photo = photos[activePhotoIndex];
+    photoAnimation?.cancel(); enlargedPhoto.style.transform = '';
+    loadEnlargedPhoto(photoSource(photo), photo.alt);
+    photoPosition.hidden = false; photoPosition.textContent = `${activePhotoIndex + 1} / ${photos.length}`;
+    $('#photo-prev').hidden = photos.length < 2; $('#photo-next').hidden = photos.length < 2;
+    if (direction && document.documentElement.dataset.motion !== 'reduce') {
+      photoAnimation = enlargedPhoto.animate([
+        {opacity:.35, transform:`translateX(${direction * 30}px)`},
+        {opacity:1, transform:'translateX(0)'}
+      ], {duration:220, easing:'ease-out'});
+    }
+    [-1,1].forEach((offset,i) => {adjacentPhotos[i].src = photoSource(photos[(activePhotoIndex + offset + photos.length) % photos.length]);});
+  }
+  function changePhoto(direction) {
+    if (activePhotoIndex >= 0 && photos.length > 1) showGalleryPhoto(activePhotoIndex + direction, direction);
+  }
+  function openPhoto(photo) {
+    showGalleryPhoto(photos.indexOf(photo));
+    document.body.classList.add('photo-open'); photoDialog.showModal();
+  }
+  $('#photo-prev').addEventListener('click', () => changePhoto(-1));
+  $('#photo-next').addEventListener('click', () => changePhoto(1));
+  photoDialog.addEventListener('keydown', event => {
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      event.preventDefault(); changePhoto(event.key === 'ArrowRight' ? 1 : -1);
+    }
+  });
+  photoStage.addEventListener('pointerdown', event => {
+    if (!event.isPrimary || event.button !== 0 || event.target.closest('button') || activePhotoIndex < 0 || photos.length < 2) return;
+    photoAnimation?.cancel();
+    photoGesture = {id:event.pointerId, x:event.clientX, y:event.clientY};
+    photoStage.setPointerCapture(event.pointerId);
+  });
+  photoStage.addEventListener('pointermove', event => {
+    if (!photoGesture || event.pointerId !== photoGesture.id) return;
+    const dx=event.clientX-photoGesture.x, dy=event.clientY-photoGesture.y;
+    if (Math.abs(dx)>Math.abs(dy)) enlargedPhoto.style.transform=`translateX(${Math.max(-70,Math.min(70,dx*.4))}px)`;
+  });
+  photoStage.addEventListener('pointerup', event => {
+    if (!photoGesture || event.pointerId !== photoGesture.id) return;
+    const dx=event.clientX-photoGesture.x, dy=event.clientY-photoGesture.y;
+    photoGesture=null; enlargedPhoto.style.transform='';
+    if (Math.abs(dx)>=45 && Math.abs(dx)>Math.abs(dy)*1.3) changePhoto(dx<0?1:-1);
+  });
+  photoStage.addEventListener('pointercancel', () => {photoGesture=null; enlargedPhoto.style.transform='';});
+  photoDialog.addEventListener('close', () => {
+    document.body.classList.remove('photo-open'); photoGesture=null; activePhotoIndex=-1;
+    photoAnimation?.cancel(); enlargedPhoto.style.transform=''; clearTimeout(photoLoadingTimer);
+  });
   const ceremonyPhoto = $('#ceremony-photo');
   if (ceremonyPhoto) ceremonyPhoto.addEventListener('click', () => {
-    const image = $('img', ceremonyPhoto);
-    const enlarged = $('#photo-dialog-image');
-    enlarged.src = image.currentSrc || image.src;
-    enlarged.alt = image.alt;
-    $('#photo-dialog').showModal();
+    const image = $('img', ceremonyPhoto); activePhotoIndex=-1;
+    $('#photo-prev').hidden=true; $('#photo-next').hidden=true; photoPosition.hidden=true;
+    loadEnlargedPhoto(image.currentSrc || image.src, image.alt);
+    document.body.classList.add('photo-open'); photoDialog.showModal();
   });
 
   function createGalleryPhoto(photo, index) {
@@ -350,7 +427,7 @@
       const img = node('img'); const stem = `assets/photos/photo-${String(photo.id).padStart(2,'0')}`; img.src = asset(`${stem}-small.webp`);
       if (!window.WEDDING_ASSET_MAP) img.srcset = `${stem}-small.webp 560w, ${stem}.webp 1200w`;
       img.sizes = '(max-width: 430px) calc((100vw - 44px) / 2), 194px';
-      img.alt = photo.alt; img.width = photo.width; img.height = photo.height; img.loading = 'lazy'; img.decoding = 'async'; img.draggable = false;
+      img.alt = photo.alt; img.width = photo.width; img.height = photo.height; img.style.setProperty('--photo-ratio', `${photo.width} / ${photo.height}`); img.loading = 'lazy'; img.decoding = 'async'; img.draggable = false;
       button.append(img); button.addEventListener('click', () => openPhoto(photo)); figure.append(button);
       return figure;
   }
@@ -370,9 +447,22 @@
   }
   renderGallery();
 
+  function guestFlower() {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 32 32'); svg.setAttribute('aria-hidden', 'true');
+    svg.classList.add('guest-flower');
+    for (let i = 0; i < 12; i++) {
+      const petal = document.createElementNS(svg.namespaceURI, 'ellipse');
+      for (const [key, value] of Object.entries({cx:16, cy:9, rx:2.6, ry:6, fill:'currentColor', opacity: i % 2 ? '.48' : '.7', transform:`rotate(${i * 30} 16 16)`})) petal.setAttribute(key, value);
+      svg.append(petal);
+    }
+    const center = document.createElementNS(svg.namespaceURI, 'circle');
+    center.setAttribute('cx',16); center.setAttribute('cy',16); center.setAttribute('r',3); center.setAttribute('fill','#9A7AA2'); svg.append(center);
+    return svg;
+  }
   function renderEmpty(message) {
     const card = node('article', 'guest-card empty-card reveal');
-    card.append(node('span', 'guest-flower', '✿'), node('p', '', message));
+    card.append(guestFlower(), node('p', '', message));
     $('#guestbook-list').replaceChildren(card); $('#guestbook-list').setAttribute('aria-busy', 'false');
     observeReveals(card);
   }
@@ -380,9 +470,8 @@
     const card = node('article', 'guest-card reveal'); card.dataset.id = entry.id;
     const remove = node('button', 'guest-delete', '×'); remove.type = 'button'; remove.setAttribute('aria-label', `${entry.name}님의 방명록 삭제`);
     remove.addEventListener('click', () => { state.deleteId = entry.id; $('#delete-form').reset(); openDialog('#delete-dialog'); });
-    const author = node('p', 'guest-author', `From. ${entry.name}`);
-    const date = new Date(entry.createdAt); const formatted = Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString('ko-KR', {timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'});
-    author.append(node('span', 'guest-date', formatted)); card.append(remove, node('span','guest-flower','✿'), node('p','guest-message',entry.message), author); return card;
+    const author = node('p', 'guest-author', `- ${entry.name} -`);
+    card.append(remove, guestFlower(), node('p','guest-message',entry.message), author); return card;
   }
   async function loadGuests(append = false, limit = 3) {
     const list = $('#guestbook-list'); list.setAttribute('aria-busy', 'true');
@@ -391,7 +480,7 @@
       if (!append) list.replaceChildren();
       data.items.forEach(entry => list.append(guestCard(entry)));
       if (!list.childElementCount) renderEmpty('아직 남겨진 축하 글이 없습니다. 첫 마음을 남겨주세요.');
-      state.before = data.nextBefore; $('#guestbook-more').hidden = !data.nextBefore;
+      state.before = data.nextBefore;
       $('#guestbook-retry').hidden = true;
       $('#connection-status').textContent = state.mode === 'local-preview' ? '로컬 미리보기 · 이 컴퓨터의 테스트 기록만 표시됩니다.' : '';
       observeReveals(list);
@@ -399,13 +488,25 @@
     } catch (error) { if (!append) renderEmpty('축하 글을 불러오지 못했습니다. 다시 불러오기를 눌러 주세요.'); $('#connection-status').textContent = error.message; $('#guestbook-retry').hidden = false; return false; }
     finally { list.setAttribute('aria-busy', 'false'); }
   }
-  $('#guestbook-more').addEventListener('click', async event => {
-    const button = event.currentTarget; button.disabled = true;
-    for (let page = 0; state.before && page < 20; page++) {
-      if (!await loadGuests(true, 12)) break;
-    }
-    button.disabled = false;
-  });
+  let allGuestsBefore = null;
+  async function loadAllGuests(append = false) {
+    const list = $('#guestbook-all-list'); const more = $('#guestbook-all-next');
+    list.setAttribute('aria-busy', 'true'); more.disabled = true;
+    if (!append) { list.replaceChildren(node('p', '', '축하 글을 불러오고 있습니다.')); allGuestsBefore = null; }
+    try {
+      if (!state.api) throw new Error('방명록 서버에 연결할 수 없습니다. 잠시 후 다시 확인해 주세요.');
+      const data = await api(`/guestbook?limit=20${append && allGuestsBefore ? `&before=${allGuestsBefore}` : ''}`);
+      if (!append) list.replaceChildren();
+      data.items.forEach(entry => list.append(guestCard(entry)));
+      if (!list.childElementCount) list.append(node('p', '', '아직 남겨진 축하 글이 없습니다. 첫 마음을 남겨주세요.'));
+      allGuestsBefore = data.nextBefore; more.hidden = !allGuestsBefore;
+    } catch(error) {
+      if (!append) list.replaceChildren(node('p', '', error.message));
+      else toast(error.message);
+    } finally { list.setAttribute('aria-busy', 'false'); more.disabled = false; }
+  }
+  $('#guestbook-more').addEventListener('click', () => { openDialog('#guestbook-all-dialog'); loadAllGuests(); });
+  $('#guestbook-all-next').addEventListener('click', () => loadAllGuests(true));
   let connectionTask;
   function connect() {
     if (!connectionTask) connectionTask = connectOnce().finally(() => { connectionTask = null; });
@@ -455,24 +556,31 @@
   });
   $('#delete-form').addEventListener('submit', async event => {
     event.preventDefault(); const form=event.currentTarget; const button=$('.submit-button',form);button.disabled=true;
-    try {await api(`/guestbook/${state.deleteId}/delete`,'POST',{password:form.elements.password.value});form.reset();$('#delete-dialog').close();await loadGuests();toast('방명록을 삭제했습니다.');}catch(error){status(form,error.message);}finally{button.disabled=false;}
+    try {await api(`/guestbook/${state.deleteId}/delete`,'POST',{password:form.elements.password.value});form.reset();$('#delete-dialog').close();await loadGuests();if ($('#guestbook-all-dialog').open) await loadAllGuests();toast('방명록을 삭제했습니다.');}catch(error){status(form,error.message);}finally{button.disabled=false;}
   });
   for (const [side,label] of [['groom','신랑측 계좌번호'],['bride','신부측 계좌번호']]) {
     const details=node('details');details.open=true;details.append(node('summary','',label));const body=node('div','account-body');const accounts=(config.accounts||[]).filter(item=>item.side===side && item.bank && item.number && item.holder);
     accounts.forEach(account=>{
       const row=node('div','account-row');
       const person=node('p','account-person');
-      person.append(node('small','',account.role || (side==='groom'?'신랑측':'신부측')),node('strong','',account.holder));
-      const number=node('p','account-number',account.number);number.dir='ltr';
-      row.append(person,node('p','account-bank',account.bank),number);
+      person.append(node('span','sr-only',`${account.role || (side==='groom'?'신랑측':'신부측')} `),node('strong','',account.holder));
+      const number=node('span','account-number',account.number);number.dir='ltr';
+      const bankline=node('p','account-bankline');
+      bankline.append(node('span','account-bank',account.bank), node('span','', ' | '),number);
+      row.append(bankline, person);
       const actions=node('div','account-actions');
-      const button=node('button','account-copy','계좌번호 복사');button.type='button';
+      const button=node('button','account-copy');button.type='button';
+      const copyLabel=()=> {
+        const icon=document.createElementNS('http://www.w3.org/2000/svg','svg'); icon.setAttribute('viewBox','0 0 16 16'); icon.setAttribute('aria-hidden','true');
+        const path=document.createElementNS(icon.namespaceURI,'path');path.setAttribute('d','M6 5h7v9H6zM10 5V2H3v9h3');icon.append(path);
+        button.replaceChildren(icon,document.createTextNode('복사'));
+      }; copyLabel();
       button.setAttribute('aria-label',`${account.holder} 계좌번호 복사`);
       let resetLabel;
       button.addEventListener('click',async()=>{
         if(await copy(account.number)) {
-          clearTimeout(resetLabel);button.textContent='복사했어요 ✓';
-          resetLabel=window.setTimeout(()=>{button.textContent='계좌번호 복사';},2200);
+          clearTimeout(resetLabel);button.textContent='완료 ✓';
+          resetLabel=window.setTimeout(copyLabel,2200);
         }
       });
       actions.append(button);
@@ -480,7 +588,9 @@
         try {
           const url=new URL(account.kakaoPayUrl);
           if(url.protocol==='https:' && ['qr.kakaopay.com','link.kakaopay.com'].includes(url.hostname) && !url.username && !url.password) {
-            const pay=node('a','account-pay','카카오페이 간편송금 ↗');
+            const pay=node('a','account-pay');
+            const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('viewBox','0 0 24 24');icon.setAttribute('aria-hidden','true');
+            const path=document.createElementNS(icon.namespaceURI,'path');path.setAttribute('d','M12 3C6.5 3 2 6.5 2 10.8c0 2.8 1.9 5.2 4.8 6.6L6 21l4.1-2.6h1.9c5.5 0 10-3.4 10-7.6S17.5 3 12 3Z');icon.append(path);pay.append(icon,document.createTextNode('pay'));
             pay.href=url.href;pay.target='_blank';pay.rel='noopener noreferrer';
             pay.setAttribute('aria-label',`${account.holder}에게 카카오페이로 송금하기, 새 창`);actions.append(pay);
           }

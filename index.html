@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="wedding-build" content="20260919-gallery-clean">
+  <meta name="wedding-build" content="20260919-reference-audit">
   <meta name="theme-color" content="#F1F0EE">
   <meta name="robots" content="noindex, nofollow">
   <title>훈백과 지우, 결혼합니다</title>
@@ -17,14 +17,14 @@
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1333">
   <meta property="og:image:height" content="2000">
-  <link id="webfonts" rel="stylesheet" href="invitation-fonts.css?v=20260914-video-intro-v1">
+  <link id="webfonts" rel="stylesheet" href="invitation-fonts.css?v=20260919-reference-audit">
   <link rel="stylesheet" href="styles.css?v=20260913-garden-complete">
-  <link rel="stylesheet" href="design.css?v=20260919-gallery-clean">
+  <link rel="stylesheet" href="design.css?v=20260919-reference-audit">
   <script src="config.js?v=20260919-reference-pass" defer></script>
   <script src="photos.js" defer></script>
-<script src="design-data.js?v=20260919-bgm-source" defer></script>
-  <script src="apply-content.js?v=20260919-gallery-clean" defer></script>
-  <script src="app.js?v=20260919-gallery-clean" defer></script>
+<script src="design-data.js?v=20260919-reference-audit" defer></script>
+  <script src="apply-content.js?v=20260919-reference-audit" defer></script>
+  <script src="app.js?v=20260919-reference-audit" defer></script>
   <script src="design-audio.js?v=20260914-audio" defer></script>
   <script src="naver-map.js?v=20260919-reference-pass" defer></script>
 </head>
@@ -71,10 +71,7 @@
       <cite>-마 19:6-</cite>
     </blockquote>
     <div class="letter-copy reveal"><p>서로 다른 길을 걸어온 두 사람이<br>이제는 같은 길을 걸으려 합니다.<br>혼자보다 함께일 때 더 따뜻한 마음으로,<br>서로를 가장 편안한 안식처로 삼아<br>예쁘게 살겠습니다.<br>저희의 시작을 따듯한 마음으로<br>축복해 주시면 감사하겠습니다.</p></div>
-    <svg class="letter-mark reveal" viewBox="0 0 132 32" role="img" aria-label="작은 리본 곡선" xmlns="http://www.w3.org/2000/svg">
-      <path d="M6 17c24-14 36 9 57-1 22-11 34 11 63-3" pathLength="1"/>
-      <path d="M97 12c6-9 14-9 20-7-3 8-9 11-20 7Z" pathLength="1"/>
-    </svg>
+    <hr class="letter-divider reveal" aria-hidden="true">
     <div class="family-lines reveal">
       <p>박대선 <span>·</span> 이유선 <small>의 장남</small><strong>훈백</strong></p>
       <p>최완호 <span>·</span> 안효순 <small>의 차녀</small><strong>지우</strong></p>
@@ -125,6 +122,7 @@
   </section>
 
   <section id="location" class="section location">
+    <p class="section-index">LOCATION</p>
     <h2>오시는 길</h2>
     <div class="venue-heading reveal">
       <h3>더테라스웨딩</h3>
@@ -154,7 +152,12 @@
     <div class="photo-dialog-frame">
       <button type="button" class="photo-dialog-close" data-close aria-label="확대 사진 닫기">×</button>
       <h2 id="photo-dialog-title" class="sr-only">웨딩 사진 크게 보기</h2>
-      <figure class="protected-media"><img id="photo-dialog-image" alt="" draggable="false"></figure>
+      <figure class="protected-media photo-dialog-stage"><img id="photo-dialog-image" alt="" draggable="false"></figure>
+      <button id="photo-prev" class="photo-nav photo-prev" type="button" aria-label="이전 사진"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>
+      <button id="photo-next" class="photo-nav photo-next" type="button" aria-label="다음 사진"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+      <p id="photo-position" class="photo-position" aria-live="polite"></p>
+      <p id="photo-load-status" class="photo-load-status" role="status" hidden></p>
+      <button id="photo-retry" class="photo-retry" type="button" hidden>사진 다시 불러오기</button>
     </div>
   </dialog>
 
@@ -162,22 +165,21 @@
     <p class="section-index">GUESTBOOK</p>
     <h2>방명록</h2>
     <div id="guestbook-list" class="guestbook-list" aria-live="polite" aria-busy="true"><article class="guest-card empty-card"><p>축하 글을 불러오고 있습니다.</p></article></div>
-    <div class="guestbook-actions"><button class="text-button" id="guestbook-open" type="button">작성하기</button><button class="text-button" id="guestbook-more" type="button" hidden>전체보기</button><button class="text-button" id="guestbook-retry" type="button" hidden>다시 불러오기</button></div>
+    <div class="guestbook-actions"><button class="text-button" id="guestbook-open" type="button">작성하기</button><button class="text-button" id="guestbook-more" type="button">전체보기</button><button class="text-button" id="guestbook-retry" type="button" hidden>다시 불러오기</button></div>
     <p id="connection-status" class="connection-status" role="status"></p>
   </section>
 
   <section id="account" class="section account">
+    <svg class="account-sprig" viewBox="0 0 28 42" aria-hidden="true"><path d="M16 39C13 30 15 19 12 9M14 32c-8-2-10-7-9-10 6 1 9 5 9 10Zm0-10c7-2 9-7 8-11-5 2-8 6-8 11ZM12 15C5 11 7 4 10 2c5 4 5 9 2 13Zm-2-9 2 6m-4 14 5 4m5-15-3 5"/></svg>
     <h2>마음 전하실 곳</h2>
-    <p class="section-description">축하해 주시는 마음에 감사드립니다.</p>
     <div id="account-list" class="account-list"></div>
-    <p class="account-guide">계좌번호를 복사해 이용하시는 은행 앱에서<br>마음을 전하실 수 있습니다.</p>
   </section>
 
   <section id="guest-photos" class="section guest-photos">
     <div class="album-art reveal" aria-hidden="true">
       <figure><img id="mobile-album-left-image" src="assets/photos/selected-03-small.webp" width="560" height="840" alt="" loading="lazy" draggable="false"></figure>
-      <figure><img id="mobile-album-detail-image" src="assets/photos/selected-08-small.webp" width="560" height="840" alt="" loading="lazy" draggable="false"></figure>
       <figure><img id="mobile-album-right-image" src="assets/photos/selected-05-small.webp" width="560" height="840" alt="" loading="lazy" draggable="false"></figure>
+      <figure><img id="mobile-album-detail-image" src="assets/photos/selected-08-small.webp" width="560" height="840" alt="" loading="lazy" draggable="false"></figure>
     </div>
     <p class="section-index">CAPTURE OUR MOMENTS</p>
     <h2>축하 사진 공유</h2>
@@ -202,9 +204,9 @@
     <figcaption class="closing-overlay"><p id="ending-overlay-copy">서로의 가장 편안한 안식처가 되어<br>함께 따뜻한 날들을 살아가겠습니다.</p><small>훈백 · 지우</small></figcaption>
   </figure>
   <footer class="ending reveal">
-    <p class="closing-message">12월 19일, 반갑게 인사드릴게요.</p>
+
     <button class="kakao-share-button" id="share-link" type="button"><svg class="kakao-symbol" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="4" fill="#FEE500"/><path d="M12 5.3c-4.2 0-7.5 2.6-7.5 5.8 0 2.1 1.4 3.9 3.5 4.9l-.8 2.8 3.3-2.2c.5.1 1 .1 1.5.1 4.2 0 7.5-2.6 7.5-5.7S16.2 5.3 12 5.3Z" fill="#3C1F1E"/></svg> 카카오톡으로 초대장 보내기</button>
-    <p class="share-hint">공유 메뉴에서 카카오톡을 선택해 주세요.</p>
+    <p class="share-hint sr-only" role="status">공유 메뉴에서 카카오톡을 선택해 주세요.</p>
     <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false" hidden>움직임 줄이기</button>
     <p class="local-status" id="local-status" hidden>시안 보기 · 저장 내용은 이 기기에만 보관</p>
   </footer>
@@ -214,6 +216,12 @@
   <audio id="bgm-audio" preload="none"></audio>
   <p id="bgm-status" class="sr-only" role="status"></p>
 </div>
+
+<dialog id="guestbook-all-dialog" class="form-dialog" aria-labelledby="guestbook-all-title">
+  <header class="dialog-header"><h2 id="guestbook-all-title">방명록 전체보기</h2><button type="button" class="dialog-close" data-close aria-label="방명록 전체보기 닫기">×</button></header>
+  <div id="guestbook-all-list" class="guestbook-all-list" aria-live="polite"></div>
+  <button id="guestbook-all-next" class="text-button guestbook-load-more" type="button" hidden>더 불러오기</button>
+</dialog>
 
 <dialog id="guestbook-dialog" class="form-dialog" aria-labelledby="guestbook-title">
   <header class="dialog-header"><h2 id="guestbook-title">방명록 작성하기</h2><button type="button" class="dialog-close" data-close aria-label="방명록 작성 닫기">×</button></header>

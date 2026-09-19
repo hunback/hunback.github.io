@@ -76,3 +76,6 @@
   font-display: swap;
   src: url(assets/fonts/bcc2c8b38b3be4ef.ttf) format('truetype');
 }
+
+@font-face { font-family: 'Crimson Pro'; font-style: normal; font-weight: 400; font-display: swap; src: url('assets/fonts/crimson-pro-400.ttf') format('truetype'); }
+@font-face { font-family: 'Crimson Pro'; font-style: normal; font-weight: 500; font-display: swap; src: url('assets/fonts/crimson-pro-500.ttf') format('truetype'); }
