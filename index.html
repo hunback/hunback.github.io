@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="wedding-build" content="20260917-kakao-photo">
+  <meta name="wedding-build" content="20260919-reference-pass">
   <meta name="theme-color" content="#F1F0EE">
   <meta name="robots" content="noindex, nofollow">
   <title>훈백과 지우, 결혼합니다</title>
@@ -19,12 +19,12 @@
   <meta property="og:image:height" content="2000">
   <link id="webfonts" rel="stylesheet" href="invitation-fonts.css?v=20260914-video-intro-v1">
   <link rel="stylesheet" href="styles.css?v=20260913-garden-complete">
-  <link rel="stylesheet" href="design.css?v=20260917-reference-pass">
-  <script src="config.js?v=20260917-kakao-share" defer></script>
+  <link rel="stylesheet" href="design.css?v=20260919-reference-pass">
+  <script src="config.js?v=20260919-reference-pass" defer></script>
   <script src="photos.js" defer></script>
-<script src="design-data.js?v=20260917-kakao-share" defer></script>
-  <script src="apply-content.js?v=20260917-review1" defer></script>
-  <script src="app.js?v=20260917-kakao-photo" defer></script>
+<script src="design-data.js?v=20260919-reference-pass" defer></script>
+  <script src="apply-content.js?v=20260919-reference-pass" defer></script>
+  <script src="app.js?v=20260919-reference-pass" defer></script>
   <script src="design-audio.js?v=20260914-audio" defer></script>
   <script src="naver-map.js?v=20260914" defer></script>
 </head>
@@ -33,7 +33,7 @@
 
 <section id="intro-gate" class="intro-gate" aria-label="우리의 하루 도입 영상" hidden>
   <div class="intro-stage">
-    <video id="intro-video" width="720" height="1280" muted playsinline autoplay preload="auto" poster="assets/video/intro-start-20260913.jpg" disablepictureinpicture disableremoteplayback controlslist="nodownload nofullscreen noremoteplayback">
+    <video id="intro-video" width="720" height="1280" muted playsinline preload="auto" disablepictureinpicture disableremoteplayback controlslist="nodownload nofullscreen noremoteplayback">
       <source src="assets/video/intro-smooth-20260913.mp4" type="video/mp4">
     </video>
     <button id="intro-retry" class="intro-retry" type="button" hidden>영상 시작하기</button>
@@ -41,15 +41,13 @@
   </div>
 </section>
 
-<main id="wedding" class="invitation" inert>
+<main id="wedding" class="invitation">
   <header id="top" class="cover" aria-label="박훈백 최지우 결혼식 초대">
     <div class="cover-side cover-side-left" aria-label="예식일">
       <span>December 19, 2026</span>
-      <span class="cover-note">Save the date!</span>
     </div>
     <div class="cover-center">
-      <p class="cover-date-top">2026.12.19</p>
-      <h1 class="cover-title" lang="en">hunback<br><span>♥ Jiwoo</span></h1>
+      <h1 class="cover-title" lang="en">hunback<br><span><svg class="cover-heart" viewBox="0 0 24 22" aria-hidden="true"><path d="M12 19.4C7.6 16.1 2 11.7 2 7.1 2 4.5 4 2.6 6.6 2.6c2.3 0 4.1 1.2 5.4 3.1 1.3-1.9 3.1-3.1 5.4-3.1 2.6 0 4.6 1.9 4.6 4.5 0 4.6-5.6 9-10 12.3Z"/></svg> Jiwoo</span></h1>
       <figure class="cover-hero protected-media">
         <img src="assets/photos/selected-01.webp" width="1200" height="1800" alt="숲길에서 베일을 펼쳐 든 두 사람" fetchpriority="high" draggable="false">
         <svg class="hero-drawing" viewBox="0 0 240 120" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -65,22 +63,14 @@
     </div>
   </header>
 
-  <nav class="quick-nav" aria-label="청첩장 바로가기">
-    <a href="#invitation">초대의 글</a>
-    <a href="#profile">프로필</a>
-    <a href="#ceremony">예식 안내</a>
-    <a href="#location">오시는 길</a>
-    <a href="#gallery">사진</a>
-    <a href="#guestbook">방명록</a>
-  </nav>
-
   <section id="invitation" class="section letter">
-    <h2>초대의 글</h2>
+    <p class="section-index">INVITATION</p>
+    <h2>소중한 분들을 초대합니다</h2>
     <blockquote class="scripture-quote reveal">
       <p>그런즉 이제 둘이 아니요 한 몸이니<br>그러므로 하나님이 짝지어 주신 것을<br>사람이 나누지 못할지니라</p>
       <cite>-마 19:6-</cite>
     </blockquote>
-    <div class="letter-copy reveal"><p>서로 다른 길을 걸어온 두 사람이<br>이제는 같은 길을 걸으려 합니다<br>혼자보다 함께일 때 더 따뜻한 마음으로,<br>서로를 가장 편안한 안식처로 삼아<br>예쁘게 살겠습니다.<br>저희의 시작을 따뜻한 마음으로 축복해 주시면 감사하겠습니다.</p></div>
+    <div class="letter-copy reveal"><p>서로 다른 길을 걸어온 두 사람이<br>이제는 같은 길을 걸으려 합니다.<br>혼자보다 함께일 때 더 따뜻한 마음으로,<br>서로를 가장 편안한 안식처로 삼아<br>예쁘게 살겠습니다.<br>저희의 시작을 따듯한 마음으로<br>축복해 주시면 감사하겠습니다.</p></div>
     <svg class="letter-mark reveal" viewBox="0 0 132 32" role="img" aria-label="작은 리본 곡선" xmlns="http://www.w3.org/2000/svg">
       <path d="M6 17c24-14 36 9 57-1 22-11 34 11 63-3" pathLength="1"/>
       <path d="M97 12c6-9 14-9 20-7-3 8-9 11-20 7Z" pathLength="1"/>
@@ -101,7 +91,7 @@
           <img id="groom-profile-image" src="assets/photos/selected-34.webp" width="1200" height="1157" alt="훈백의 프로필 사진" loading="lazy" decoding="async" draggable="false">
         </figure>
         <div class="profile-copy">
-          <p class="profile-role">GROOM</p>
+          <p class="profile-role">신랑</p>
           <h3 id="groom-profile-name" class="profile-name">박훈백</h3>
           <p class="profile-name-en" lang="en">hunback</p>
           <p id="groom-profile-copy" class="profile-intro">바라만 보아도 저절로 미소 짓게 하고<br>지친 하루 끝엔 따뜻한 쉼이 되어주는<br>그녀와 평생을 함께하려 합니다.</p>
@@ -109,7 +99,7 @@
       </article>
       <article class="profile-card profile-bride" aria-labelledby="bride-profile-name">
         <div class="profile-copy">
-          <p class="profile-role">BRIDE</p>
+          <p class="profile-role">신부</p>
           <h3 id="bride-profile-name" class="profile-name">최지우</h3>
           <p class="profile-name-en" lang="en">Jiwoo</p>
           <p id="bride-profile-copy" class="profile-intro">사소한 일상도 기쁨으로 물들일 줄 알고<br>언제나 묵묵하고 든든한 버팀목처럼<br>필요한 순간 늘 먼저 손 내밀어 주는<br>사람과 평생을 함께하려 합니다.</p>
@@ -142,26 +132,24 @@
       <p class="address">경기 고양시 일산동구 강석로 9</p>
       <button type="button" class="text-button" id="copy-address">주소 복사</button>
     </div>
-    <div class="station-card reveal"><span class="station-badge">3</span><div><strong>백석역 5번 출구</strong><p>출구에서 도보 1분</p></div><span class="station-arrow" aria-hidden="true">↗</span></div>
     <div class="map-embed reveal"><div id="naver-map" style="height:300px" aria-label="더테라스웨딩 네이버 지도"></div></div>
     <div class="map-actions">
       <a href="https://map.naver.com/p/search/%EB%8D%94%ED%85%8C%EB%9D%BC%EC%8A%A4%EC%9B%A8%EB%94%A9" target="_blank" rel="noopener noreferrer">네이버 지도 <span aria-hidden="true">↗</span></a>
       <a href="https://map.kakao.com/link/search/%EB%8D%94%ED%85%8C%EB%9D%BC%EC%8A%A4%EC%9B%A8%EB%94%A9" target="_blank" rel="noopener noreferrer">카카오맵 <span aria-hidden="true">↗</span></a>
     </div>
-    <div class="travel-details"><h3>자가용 · 주차</h3><p>내비게이션에 ‘더테라스웨딩’ 검색<br>본 건물 3층–9층 주차장 이용<br>하객 2시간 무료 주차</p></div>
+    <div class="transport-list reveal">
+      <section class="transport-subway"><h3>지하철</h3><p>3호선 백석역 5번 출구 · 도보 1분</p></section>
+      <section class="transport-bus"><h3>버스</h3><p>백석역·고양종합터미널 인근 정류장 하차<br>노선은 출발지에 따라 네이버 지도에서 확인해 주세요.</p></section>
+      <section class="transport-driving"><h3>자가용</h3><p>내비게이션에 더테라스웨딩 검색<br>경기 고양시 일산동구 강석로 9</p></section>
+      <section class="transport-parking"><h3>주차</h3><p>본 건물 3층–9층 · 하객 2시간 무료 주차</p></section>
+    </div>
   </section>
-
-  <figure class="editorial-photo editorial-photo-tall protected-media reveal">
-    <img id="mobile-interlude-image" src="assets/photos/selected-19.webp" width="1333" height="2000" alt="푸른 하늘 아래 서로를 안아 올린 두 사람" loading="lazy" decoding="async" draggable="false">
-  </figure>
 
   <section id="gallery" class="section gallery">
     <p class="section-index">GALLERY</p>
     <h2>웨딩 갤러리</h2>
     <p class="section-description">사진을 누르면 크게 볼 수 있어요.</p>
     <div class="gallery-grid" id="gallery-grid" aria-label="선정한 웨딩 사진"></div>
-    <button id="gallery-more" class="outline-button more-button" type="button">사진 더보기 <span aria-hidden="true">＋</span></button>
-    <p class="photo-counter" id="photo-counter"></p>
     <noscript><p>사진 목록과 방명록은 JavaScript를 켜면 이용하실 수 있습니다.</p></noscript>
   </section>
 
@@ -169,7 +157,7 @@
     <div class="photo-dialog-frame">
       <button type="button" class="photo-dialog-close" data-close aria-label="확대 사진 닫기">×</button>
       <h2 id="photo-dialog-title" class="sr-only">웨딩 사진 크게 보기</h2>
-      <figure class="protected-media"><img id="photo-dialog-image" alt="" draggable="false"><figcaption id="photo-dialog-caption"></figcaption></figure>
+      <figure class="protected-media"><img id="photo-dialog-image" alt="" draggable="false"></figure>
     </div>
   </dialog>
 

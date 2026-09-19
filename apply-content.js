@@ -304,7 +304,14 @@
     title.replaceChildren(document.createTextNode(groomEn || 'hunback'));
     title.append(document.createElement('br'));
     const second = document.createElement('span');
-    second.textContent = `♥ ${brideEn || 'Jiwoo'}`;
+    const heart = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    heart.setAttribute('viewBox', '0 0 24 22');
+    heart.setAttribute('aria-hidden', 'true');
+    heart.classList.add('cover-heart');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M12 19.4C7.6 16.1 2 11.7 2 7.1 2 4.5 4 2.6 6.6 2.6c2.3 0 4.1 1.2 5.4 3.1 1.3-1.9 3.1-3.1 5.4-3.1 2.6 0 4.6 1.9 4.6 4.5 0 4.6-5.6 9-10 12.3Z');
+    heart.append(path);
+    second.append(heart, document.createTextNode(' ' + (brideEn || 'Jiwoo')));
     title.append(second);
   }
   const cover = $('.cover');
@@ -319,6 +326,8 @@
 
   const letterCopy = $('.letter-copy');
   setParagraphs(letterCopy, copy.greeting);
+  setText('.letter .section-index', copy.invitationLabel);
+  setText('.letter h2', copy.invitationTitle);
   setText('.scripture-quote p', copy.scripture);
   setText('.scripture-quote cite', copy.scriptureSource);
   setText('.closing-message', copy.closing);
@@ -395,13 +404,15 @@
     setText('.station-card strong', stationName.replace(/^\d+호선\s*/, ''), station);
     setText('.station-card p', walk || '', station);
   }
-  setText('.travel-details p', ceremony.parking);
+  setLineBreakText($('.transport-subway p'), ceremony.subway);
+  setLineBreakText($('.transport-bus p'), ceremony.bus);
+  setLineBreakText($('.transport-driving p'), ceremony.driving);
+  setLineBreakText($('.transport-parking p'), ceremony.parking);
 
   applyParents('.family-lines p:first-child', couple.groomParents, groom, 'groom');
   applyParents('.family-lines p:last-child', couple.brideParents, bride, 'bride');
   applyPhoto('.cover-hero img', photos.mobileHero);
   applyPhoto('#ceremony-photo img', photos.mobileScarf);
-  applyPhoto('#mobile-interlude-image', photos.mobileInterlude);
   applyPhoto('#mobile-album-left-image', photos.mobileAlbumLeft);
   applyPhoto('#mobile-album-detail-image', photos.mobileAlbumDetail);
   applyPhoto('#mobile-album-right-image', photos.mobileAlbumRight);

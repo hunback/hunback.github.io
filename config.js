@@ -1,6 +1,6 @@
 /* Public configuration. Never put an API secret, administrator token, or guest data here. */
 window.WEDDING_CONFIG = {
-  version: 'mobile-20260917-kakao-share',
+  version: 'mobile-20260919-reference-pass',
   canonicalUrl: 'https://hunback.github.io/',
   // 카카오디벨로퍼스 JavaScript 키만 넣습니다. 어드민 키와 REST API 키는 넣지 않습니다.
   kakaoJavaScriptKey: '7c74f3002f659bfacaebba51deb1aac5',
@@ -19,6 +19,8 @@ window.WEDDING_CONFIG = {
   // 각 kakaoPayUrl의 빈 따옴표 안에 송금 링크를 넣으면 해당 송금 버튼이 나타납니다.
   accounts: [
     { side: 'groom', role: '신랑', bank: '카카오뱅크', number: '3333-02-4301683', holder: '박훈백', kakaoPayUrl: '' },
-    { side: 'bride', role: '신부', bank: '카카오뱅크', number: '3333-06-5024327', holder: '최지우', kakaoPayUrl: '' }
+    { side: 'bride', role: '신부', bank: '카카오뱅크', number: '3333-06-5024327', holder: '최지우', kakaoPayUrl: '' },
+    { side: 'bride', role: '신부 아버지', bank: '카카오뱅크', number: '3333-33-7728094', holder: '최완호', kakaoPayUrl: '' },
+    { side: 'bride', role: '신부 어머니', bank: '우체국', number: '104877-02-252013', holder: '안효순', kakaoPayUrl: '' }
   ]
 };

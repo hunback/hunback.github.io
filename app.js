@@ -89,69 +89,101 @@
   $('#guestbook-open').addEventListener('click', () => openDialog('#guestbook-dialog'));
   $('#contact-open').addEventListener('click', () => openDialog('#contact-dialog'));
 
-  // The supplied couple film runs once, then fades into the handwritten cover.
+  // Keep an unloaded or stalled film invisible. The white gate dissolves in only
+  // after playback starts, then dissolves out during the final frames.
   const video = $('#intro-video'); const introGate = $('#intro-gate'); const retry = $('#intro-retry');
   const main = $('#wedding'); const introSkip = $('#intro-skip');
   const media = window.WEDDING_MEDIA || window.DESIGN_CONTENT?.media || {};
-  const introFadeMs = 1500;
-  let introFinished = false; let introReady = false; let playTimer; let loadingTimer; let stallTimer;
-  function finishIntro(immediate = false) {
+  const introFadeInMs = 650;
+  const introFadeOutMs = 850;
+  let introFinished = false; let introReady = false; let introExiting = false;
+  let loadingTimer; let stallTimer; let exitTimer;
+  function removeIntroGate() {
     if (introFinished) return;
     introFinished = true;
-    clearTimeout(playTimer); clearTimeout(loadingTimer); clearTimeout(stallTimer);
+    clearTimeout(loadingTimer); clearTimeout(stallTimer); clearTimeout(exitTimer);
     video?.pause();
     const restoreFocus = Boolean(introGate?.contains(document.activeElement));
     if (retry) retry.hidden = true;
     document.body.classList.add('intro-complete');
-    let gateRemoved = false;
-    const removeGate = () => {
-      if (gateRemoved) return;
-      gateRemoved = true;
-      if (introGate) introGate.hidden = true;
-      document.body.classList.remove('intro-active');
-      if (main) main.inert = false;
-      if (restoreFocus) $('.down-link')?.focus({ preventScroll: true });
-    };
-    if (immediate || !introGate) { removeGate(); return; }
+    if (introGate) introGate.hidden = true;
+    document.body.classList.remove('intro-active');
+    if (main) main.inert = false;
+    if (restoreFocus) $('#invitation')?.focus?.({ preventScroll: true });
+  }
+  function finishIntro(immediate = false) {
+    if (introFinished || introExiting) {
+      if (immediate) removeIntroGate();
+      return;
+    }
+    introExiting = true;
+    clearTimeout(loadingTimer); clearTimeout(stallTimer); clearTimeout(exitTimer);
+    document.body.classList.add('intro-complete');
+    if (main) main.inert = false;
+    if (immediate || !introGate) { removeIntroGate(); return; }
     introGate.classList.add('is-leaving');
     introGate.addEventListener('transitionend', event => {
-      if (event.target === introGate && event.propertyName === 'opacity') removeGate();
+      if (event.target === introGate && event.propertyName === 'opacity') removeIntroGate();
     });
-    window.setTimeout(removeGate, introFadeMs + 80);
+    exitTimer = window.setTimeout(removeIntroGate, introFadeOutMs + 80);
+  }
+  function scheduleIntroExit() {
+    clearTimeout(exitTimer);
+    if (!video || introFinished || introExiting || !Number.isFinite(video.duration)) return;
+    const delay = Math.max(0, (video.duration - video.currentTime - introFadeOutMs / 1000) * 1000);
+    exitTimer = window.setTimeout(() => finishIntro(), delay);
   }
   async function playIntro() {
     if (introFinished || !video) return;
     if (retry) retry.hidden = true;
-    try { await video.play(); if (introFinished) video.pause(); }
+    try {
+      await video.play();
+      if (introFinished) video.pause();
+      else scheduleIntroExit();
+    }
     catch (_) { if (!introFinished && retry) retry.hidden = false; }
   }
   function readyIntro() {
     if (introReady || introFinished || !video || !introGate) return;
     introReady = true;
     clearTimeout(loadingTimer);
-    introGate.classList.add('is-ready');
     if (reduced.matches) finishIntro(true);
-    else playTimer = window.setTimeout(playIntro, introFadeMs);
+    else {
+      try {
+        if (video.currentTime < .02 && Number.isFinite(video.duration)) video.currentTime = Math.min(.04, video.duration / 20);
+      } catch (_) { /* Some mobile browsers do not allow a seek before playback. */ }
+      playIntro();
+    }
   }
   if (video) {
     video.muted = true;
     video.playsInline = true;
-    video.autoplay = media?.introEnabled !== false && !reduced.matches && !location.hash;
-    if (!video.autoplay) video.removeAttribute('autoplay');
+    video.autoplay = false;
+    video.removeAttribute('autoplay');
     video.loop = false;
     video.addEventListener('loadeddata', readyIntro, { once: true });
-    video.addEventListener('ended', () => finishIntro());
-    video.addEventListener('error', () => finishIntro());
+    video.addEventListener('canplay', readyIntro, { once: true });
+    video.addEventListener('ended', () => finishIntro(true));
+    video.addEventListener('error', () => finishIntro(true));
     // A failed download must never leave guests trapped behind the opening.
-    $('source', video)?.addEventListener('error', () => finishIntro());
+    $('source', video)?.addEventListener('error', () => finishIntro(true));
     video.addEventListener('waiting', () => {
+      introGate?.classList.remove('is-ready');
+      clearTimeout(exitTimer);
       clearTimeout(stallTimer);
-      stallTimer = window.setTimeout(() => finishIntro(), 8000);
+      stallTimer = window.setTimeout(() => finishIntro(true), 2500);
     });
-    video.addEventListener('playing', () => clearTimeout(stallTimer));
+    video.addEventListener('playing', () => {
+      clearTimeout(stallTimer);
+      introGate?.classList.add('is-ready');
+      scheduleIntroExit();
+    });
+    video.addEventListener('timeupdate', () => {
+      if (Number.isFinite(video.duration) && video.duration - video.currentTime <= introFadeOutMs / 1000) finishIntro();
+    });
   }
   retry?.addEventListener('click', playIntro);
-  introSkip?.addEventListener('click', () => finishIntro());
+  introSkip?.addEventListener('click', () => finishIntro(true));
   reduced.addEventListener?.('change', event => { if (event.matches) finishIntro(true); });
   if (!media || media.introEnabled !== false) {
     if (!video || !introGate || !main || location.hash || reduced.matches) finishIntro(true);
@@ -159,7 +191,7 @@
       introGate.hidden = false;
       document.body.classList.add('intro-active');
       main.inert = true;
-      loadingTimer = window.setTimeout(() => finishIntro(), 8000);
+      loadingTimer = window.setTimeout(() => finishIntro(true), 6000);
       if (video.readyState >= 2) readyIntro();
       if (video.ended) finishIntro();
     }
@@ -298,7 +330,6 @@
     const stem = `assets/photos/photo-${String(photo.id).padStart(2,'0')}`;
     const image = $('#photo-dialog-image');
     image.src = asset(`${stem}.webp`); image.alt = photo.alt;
-    $('#photo-dialog-caption').textContent = photo.alt;
     $('#photo-dialog').showModal();
   }
 
@@ -308,19 +339,10 @@
     const enlarged = $('#photo-dialog-image');
     enlarged.src = image.currentSrc || image.src;
     enlarged.alt = image.alt;
-    $('#photo-dialog-caption').textContent = image.alt;
     $('#photo-dialog').showModal();
   });
 
-  function renderMorePhotos() {
-    const end = Math.min(state.galleryCount + (state.galleryCount ? 8 : 6), photos.length); const grid = $('#gallery-grid');
-    let columns = $$('.gallery-column', grid);
-    if (!columns.length) {
-      columns = [node('div', 'gallery-column'), node('div', 'gallery-column')];
-      grid.append(...columns);
-    }
-    for (let index = state.galleryCount; index < end; index++) {
-      const photo = photos[index];
+  function createGalleryPhoto(photo, index) {
       const figure = node('figure', 'reveal photo-reveal');
       figure.style.setProperty('--reveal-delay', `${index % 2 * 90}ms`);
       const button = node('button', 'gallery-photo protected-media'); button.type = 'button';
@@ -329,13 +351,37 @@
       if (!window.WEDDING_ASSET_MAP) img.srcset = `${stem}-small.webp 560w, ${stem}.webp 1200w`;
       img.sizes = '(max-width: 430px) calc((100vw - 44px) / 2), 194px';
       img.alt = photo.alt; img.width = photo.width; img.height = photo.height; img.loading = 'lazy'; img.decoding = 'async'; img.draggable = false;
-      button.append(img); button.addEventListener('click', () => openPhoto(photo)); figure.append(button); columns[index % 2].append(figure);
-    }
-    state.galleryCount = end; $('#gallery-more').hidden = end >= photos.length;
-    $('#photo-counter').textContent = `${end} / ${photos.length}`;
+      button.append(img); button.addEventListener('click', () => openPhoto(photo)); figure.append(button);
+      return figure;
+  }
+  function renderGallery() {
+    const grid = $('#gallery-grid');
+    const groups = new Map();
+    photos.forEach(photo => {
+      const group = photo.group || '웨딩 갤러리';
+      if (!groups.has(group)) groups.set(group, []);
+      groups.get(group).push(photo);
+    });
+    grid.replaceChildren();
+    let photoIndex = 0;
+    groups.forEach((items, title) => {
+      const section = node('section', 'gallery-mood');
+      section.setAttribute('aria-label', title);
+      section.append(node('h3', 'gallery-mood-title', title));
+      const columns = node('div', 'gallery-mood-columns');
+      const left = node('div', 'gallery-column');
+      const right = node('div', 'gallery-column');
+      items.forEach((photo, index) => {
+        (index % 2 ? right : left).append(createGalleryPhoto(photo, photoIndex++));
+      });
+      columns.append(left, right);
+      section.append(columns);
+      grid.append(section);
+    });
+    state.galleryCount = photos.length;
     observeReveals(grid);
   }
-  $('#gallery-more').addEventListener('click', renderMorePhotos); renderMorePhotos();
+  renderGallery();
 
   function renderEmpty(message) {
     const card = node('article', 'guest-card empty-card reveal');
@@ -513,7 +559,7 @@
     } else guestSend.disabled = false;
   });
   // All useful sections participate, including controls and dynamically built cards.
-  $$('.section > .map-actions, .travel-details, .calendar-button, .gallery-guide, .more-button, .guestbook-actions, .account-guide, .rsvp-card, .closing-photo, .ending > p, .ending > #share-link').forEach(el => el.classList.add('reveal'));
+  $$('.section > .map-actions, .transport-list, .calendar-button, .gallery-guide, .guestbook-actions, .account-guide, .rsvp-card, .closing-photo, .ending > p, .ending > #share-link').forEach(el => el.classList.add('reveal'));
   observeReveals();
   const navLinks = $$('.quick-nav a');
   let navFrame = 0;
@@ -528,6 +574,6 @@
   window.addEventListener('scroll', () => { if (!navFrame) navFrame = requestAnimationFrame(updateNav); }, {passive:true});
   window.addEventListener('resize', updateNav); updateNav();
   // Audit information is explicit: a class-name inference is not a verified metric match.
-  window.WEDDING_DIAGNOSTICS={version:config.version,photos:photos.length,lightbox:true,rsvpAutoOpen:false,introLoop:video?.loop ?? false,introGate:Boolean(introGate),introEnabled:media?.introEnabled !== false,introFadeMs,representativePhoto:42,fontFamilyEvidence:'Caveat / Gowun Dodum / Cormorant Garamond',fontsLoaded:false};
+  window.WEDDING_DIAGNOSTICS={version:config.version,photos:photos.length,lightbox:true,rsvpAutoOpen:false,introLoop:video?.loop ?? false,introGate:Boolean(introGate),introEnabled:media?.introEnabled !== false,introFadeInMs,introFadeOutMs,representativePhoto:42,fontFamilyEvidence:'Caveat / Gowun Dodum / Cormorant Garamond',fontsLoaded:false};
   if(document.fonts){Promise.all([document.fonts.load('16px "Gowun Dodum"'),document.fonts.load('16px "Gowun Batang"'),document.fonts.load('16px "Montserrat"'),document.fonts.load('16px "Cormorant Garamond"'),document.fonts.load('28px "Caveat"')]).then(lists=>{window.WEDDING_DIAGNOSTICS.fontsLoaded=lists.every(list=>list.length>0);}).catch(()=>{window.WEDDING_DIAGNOSTICS.fontsLoaded=false;});}
 })();
