@@ -72,6 +72,7 @@
       naver.maps.Event.once(map, 'tilesloaded', () => { if (!failed) container.dataset.mapState = 'ready'; });
       if ('ResizeObserver' in window) {
         new ResizeObserver(() => {
+          if (failed || !window.naver?.maps?.Size || container.dataset.mapState === 'unavailable') return;
           map.setSize(new naver.maps.Size(container.clientWidth, container.clientHeight));
           map.setCenter(position);
         }).observe(container);
