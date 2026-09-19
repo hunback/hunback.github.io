@@ -26,18 +26,45 @@
   }
 
   audio.src = localAsset(configuredPath);
-  audio.load();
+  audio.loop = true;
+  audio.preload = 'none';
   toggle.disabled = false;
-  toggle.setAttribute('aria-label', '배경 음악 켜기'); toggle.setAttribute('aria-pressed', 'false');
-
-  toggle.addEventListener('click', async () => {
-    if (audio.paused) {
-      try { await audio.play(); }
-      catch (_) { status.textContent = '음악을 재생하지 못했습니다.'; }
-    } else audio.pause();
+  let wantsMusic = true;
+  let starting = null;
+  function render() {
+    const playing = !audio.paused && !audio.ended;
+    toggle.setAttribute('aria-pressed', String(playing));
+    toggle.setAttribute('aria-label', playing ? '배경 음악 끄기' : '배경 음악 켜기');
+    toggle.title = playing ? '배경 음악 끄기' : '배경 음악 켜기';
+  }
+  async function start() {
+    if (!wantsMusic || starting || !audio.paused) return;
+    starting = audio.play();
+    try {
+      await starting;
+      if (!wantsMusic) audio.pause();
+    } catch (_) {
+      status.textContent = '화면을 터치하거나 음악 버튼을 누르면 음악이 시작됩니다.';
+    } finally { starting = null; render(); }
+  }
+  function unlock(event) {
+    if (event.target?.closest?.('#bgm-toggle') || !wantsMusic) return;
+    start();
+  }
+  document.addEventListener('pointerdown', unlock, {passive: true});
+  document.addEventListener('keydown', unlock);
+  toggle.addEventListener('click', () => {
+    if (!audio.paused || starting) {
+      wantsMusic = false; audio.pause(); render();
+    } else {
+      wantsMusic = true;
+      if (audio.error) audio.load();
+      start();
+    }
   });
-  audio.addEventListener('play', () => { toggle.setAttribute('aria-label', '배경 음악 끄기'); toggle.setAttribute('aria-pressed', 'true'); status.textContent = '음악을 재생 중입니다.'; });
-  audio.addEventListener('pause', () => { toggle.setAttribute('aria-label', '배경 음악 켜기'); toggle.setAttribute('aria-pressed', 'false'); status.textContent = '음악이 멈춰 있습니다.'; });
-  audio.addEventListener('ended', () => { toggle.setAttribute('aria-label', '배경 음악 켜기'); toggle.setAttribute('aria-pressed', 'false'); status.textContent = '음악 재생이 끝났습니다.'; });
-  audio.addEventListener('error', () => { toggle.disabled = true; status.textContent = '음악을 불러오지 못했습니다.'; });
+  audio.addEventListener('playing', () => { render(); status.textContent = '음악을 재생 중입니다.'; });
+  audio.addEventListener('pause', () => { render(); status.textContent = '음악이 꺼져 있습니다.'; });
+  audio.addEventListener('error', () => { render(); status.textContent = '음악을 불러오지 못했습니다. 버튼을 눌러 다시 시도해 주세요.'; });
+  render();
+  start();
 })();
