@@ -74,7 +74,7 @@ body.intro-complete .hero-drawing-heart { animation: draw-line 700ms var(--mobil
 .cover-side { z-index: 2; display: flex; flex-direction: column; justify-content: space-between; height: 374px; padding: 3px 0; color: var(--mobile-ink); font: 400 16px/1.05 var(--mobile-hand); writing-mode: vertical-rl; text-orientation: mixed; white-space: nowrap; }
 .cover-side-left { justify-self: end; width: 1.1em; transform: rotate(180deg); }
 .cover-side span + span { margin-top: 20px; color: var(--mobile-lavender); }
-.cover-side-right { justify-self: end; }
+.cover-side-right { justify-self: start; }
 @keyframes draw-line { to { stroke-dashoffset: 0; } }
 .cover-scroll { grid-column: 1/-1; margin-top: 28px; color: var(--mobile-muted); font-size: 10px; letter-spacing: .04em; }
 .cover-scroll span { margin-left: 8px; color: var(--mobile-lavender); font-size: 16px; }
