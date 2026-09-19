@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="wedding-build" content="20260919-reference-pass2">
+  <meta name="wedding-build" content="20260919-gallery-clean">
   <meta name="theme-color" content="#F1F0EE">
   <meta name="robots" content="noindex, nofollow">
   <title>훈백과 지우, 결혼합니다</title>
@@ -19,12 +19,12 @@
   <meta property="og:image:height" content="2000">
   <link id="webfonts" rel="stylesheet" href="invitation-fonts.css?v=20260914-video-intro-v1">
   <link rel="stylesheet" href="styles.css?v=20260913-garden-complete">
-  <link rel="stylesheet" href="design.css?v=20260919-reference-pass">
+  <link rel="stylesheet" href="design.css?v=20260919-gallery-clean">
   <script src="config.js?v=20260919-reference-pass" defer></script>
   <script src="photos.js" defer></script>
 <script src="design-data.js?v=20260919-bgm-source" defer></script>
-  <script src="apply-content.js?v=20260919-reference-pass" defer></script>
-  <script src="app.js?v=20260919-reference-pass" defer></script>
+  <script src="apply-content.js?v=20260919-gallery-clean" defer></script>
+  <script src="app.js?v=20260919-gallery-clean" defer></script>
   <script src="design-audio.js?v=20260914-audio" defer></script>
   <script src="naver-map.js?v=20260919-reference-pass" defer></script>
 </head>
@@ -47,7 +47,7 @@
       <span>December 19, 2026</span>
     </div>
     <div class="cover-center">
-      <h1 class="cover-title" lang="en">hunback<br><span><svg class="cover-heart" viewBox="0 0 24 22" aria-hidden="true"><path d="M12 19.4C7.6 16.1 2 11.7 2 7.1 2 4.5 4 2.6 6.6 2.6c2.3 0 4.1 1.2 5.4 3.1 1.3-1.9 3.1-3.1 5.4-3.1 2.6 0 4.6 1.9 4.6 4.5 0 4.6-5.6 9-10 12.3Z"/></svg> Jiwoo</span></h1>
+      <h1 class="cover-title" lang="en">hunback<br><span><svg class="cover-heart" viewBox="0 0 24 22" aria-hidden="true"><path class="cover-heart-line" d="M12.1 19.5C9.6 17.2 3.3 13 2.8 8.5 2.5 5.8 4.4 3.8 7.1 4.1c2.2.2 4 1.7 5 3.8 1.2-2.3 3.1-3.8 5.5-3.7 2.8.1 4.6 2.4 3.7 5.2-1.3 4.1-6.4 8.2-9.2 10.1Z"/><path class="cover-heart-detail" d="M4.6 8.2C4.3 6.5 5.4 5.2 7 5.3"/></svg> Jiwoo</span></h1>
       <figure class="cover-hero protected-media">
         <img src="assets/photos/selected-01.webp" width="1200" height="1800" alt="숲길에서 베일을 펼쳐 든 두 사람" fetchpriority="high" draggable="false">
         <svg class="hero-drawing" viewBox="0 0 240 120" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -145,10 +145,7 @@
     </div>
   </section>
 
-  <section id="gallery" class="section gallery">
-    <p class="section-index">GALLERY</p>
-    <h2>웨딩 갤러리</h2>
-    <p class="section-description">사진을 누르면 크게 볼 수 있어요.</p>
+  <section id="gallery" class="section gallery" aria-label="웨딩 갤러리">
     <div class="gallery-grid" id="gallery-grid" aria-label="선정한 웨딩 사진"></div>
     <noscript><p>사진 목록과 방명록은 JavaScript를 켜면 이용하실 수 있습니다.</p></noscript>
   </section>

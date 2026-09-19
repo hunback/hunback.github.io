@@ -309,8 +309,12 @@
     heart.setAttribute('aria-hidden', 'true');
     heart.classList.add('cover-heart');
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', 'M12 19.4C7.6 16.1 2 11.7 2 7.1 2 4.5 4 2.6 6.6 2.6c2.3 0 4.1 1.2 5.4 3.1 1.3-1.9 3.1-3.1 5.4-3.1 2.6 0 4.6 1.9 4.6 4.5 0 4.6-5.6 9-10 12.3Z');
-    heart.append(path);
+    path.classList.add('cover-heart-line');
+    path.setAttribute('d', 'M12.1 19.5C9.6 17.2 3.3 13 2.8 8.5 2.5 5.8 4.4 3.8 7.1 4.1c2.2.2 4 1.7 5 3.8 1.2-2.3 3.1-3.8 5.5-3.7 2.8.1 4.6 2.4 3.7 5.2-1.3 4.1-6.4 8.2-9.2 10.1Z');
+    const detail = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    detail.classList.add('cover-heart-detail');
+    detail.setAttribute('d', 'M4.6 8.2C4.3 6.5 5.4 5.2 7 5.3');
+    heart.append(path, detail);
     second.append(heart, document.createTextNode(' ' + (brideEn || 'Jiwoo')));
     title.append(second);
   }

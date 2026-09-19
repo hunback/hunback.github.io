@@ -59,7 +59,8 @@ h1, h2, h3, strong { font-weight: 400; }
 .cover-date-top { color: var(--mobile-lavender); font: 500 10px/1.2 Montserrat, sans-serif; letter-spacing: .17em; }
 .cover .cover-title { position: relative; z-index: 1; margin: 14px 0 21px; color: var(--mobile-ink); font: 400 clamp(43px, 13vw, 57px)/.76 var(--mobile-hand) !important; letter-spacing: .01em; }
 .cover .cover-title span { color: var(--mobile-lavender); }
-.cover-heart { display: inline-block; width: .38em; height: .36em; margin: 0 .05em .04em; overflow: visible; fill: #D9828A; vertical-align: middle; }
+.cover-heart { display: inline-block; width: .43em; height: .41em; margin: 0 .09em .015em 0; overflow: visible; fill: none; stroke: #D9828A; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; transform: rotate(-3deg); vertical-align: middle; }
+.cover-heart-detail { opacity: .48; stroke-width: .72; }
 .cover-hero { position: relative; margin: 0 auto; overflow: hidden; border: 0; border-radius: 0 !important; background: var(--mobile-soft); }
 .cover-hero img { width: 100%; height: min(422px, calc((100vw - 108px) * 1.25)); aspect-ratio: 4/5; object-fit: cover; object-position: 50% 55%; }
 .hero-drawing { position: absolute; right: 3%; bottom: 2%; left: 3%; width: 94%; height: 27%; pointer-events: none; }
@@ -124,9 +125,9 @@ body.intro-complete .hero-drawing-heart { animation: draw-line 700ms var(--mobil
 .calendar span { min-height: 35px; color: var(--mobile-ink); font-family: Montserrat, sans-serif; font-size: 12px; }
 .calendar .weekday { color: var(--mobile-muted); font-family: var(--mobile-body); font-size: 10px; }
 .calendar .sunday { color: var(--mobile-lavender); }
-.calendar .wedding-day { width: 42px; min-height: 40px; position: relative; display: grid; place-items: center; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: var(--mobile-ink); }
-.calendar .wedding-day .calendar-heart { position: absolute; inset: 0; display: block; width: 42px; height: 40px; margin: auto; overflow: visible; fill: none; stroke: #DFA0A7; stroke-width: 1.05; stroke-linecap: round; stroke-linejoin: round; opacity: .9; }
-.calendar .wedding-day .calendar-number { position: relative; z-index: 1; margin-top: 6px; font-family: Montserrat, sans-serif; font-size: 12px; line-height: 1; color: var(--mobile-ink); }
+.calendar .wedding-day { width: 42px; height: 35px; min-height: 35px; position: relative; display: grid; place-items: center; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: var(--mobile-ink); }
+.calendar .wedding-day .calendar-heart { position: absolute; top: 50%; left: 50%; display: block; width: 44px; height: 42px; margin: 0; overflow: visible; fill: none; stroke: #DFA0A7; stroke-width: 1.05; stroke-linecap: round; stroke-linejoin: round; opacity: .9; transform: translate(-50%, -50%); }
+.calendar .wedding-day .calendar-number { position: relative; z-index: 1; display: grid; height: 1em; margin: 0; place-items: center; font-family: Montserrat, sans-serif; font-size: 12px; line-height: 1; color: var(--mobile-ink); }
 .countdown-clock { display: grid; grid-template-columns: repeat(7, min-content); justify-content: center; align-items: start; column-gap: 5px; row-gap: 12px; min-height: 0; margin: 30px auto 30px; color: var(--mobile-ink); }
 .clock-unit { display: grid; justify-items: center; gap: 5px; min-width: 44px; }
 .clock-unit small { color: var(--mobile-muted); font: 400 9px/1.2 var(--mobile-display); letter-spacing: .02em; }
@@ -171,13 +172,9 @@ body.intro-complete .hero-drawing-heart { animation: draw-line 700ms var(--mobil
 .travel-details h3 { color: var(--mobile-ink); font-size: 14px; }
 .travel-details p { color: var(--mobile-muted); font-size: 12px; line-height: 1.9; }
 
-.gallery { padding: 96px 18px 92px; }
-.gallery .section-description { margin-bottom: 27px; }
+.gallery { padding: 40px 18px 92px; }
 .gallery-grid { display: block; }
-.gallery-mood + .gallery-mood { margin-top: 48px; }
-.gallery-mood-title { margin: 0 0 15px; color: var(--mobile-lavender); font: 400 17px/1.45 var(--mobile-body); letter-spacing: -.025em; text-align: left; }
-.gallery-mood-title::after { display: inline-block; width: 27px; margin: 0 0 5px 10px; border-top: 1px solid var(--mobile-lavender); content: ''; opacity: .7; }
-.gallery-mood-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; align-items: start; }
+.gallery-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; align-items: start; }
 .gallery-column { display: flex; min-width: 0; flex-direction: column; gap: 9px; }
 .gallery-grid .group-label { display: none; }
 .gallery-grid .group-label:first-child { margin-top: 0; }

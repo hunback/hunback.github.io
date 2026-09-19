@@ -259,7 +259,7 @@
       heart.setAttribute('aria-hidden', 'true');
       heart.classList.add('calendar-heart');
       const stroke = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      stroke.setAttribute('d', 'M24 38 C19 33 7 25 6 16 C4 8 10 5 16 7 C20 8 23 11 24 14 C27 8 33 5 39 8 C46 12 43 22 36 29 C32 33 27 36 24 38');
+      stroke.setAttribute('d', 'M24.2 39.2C20.6 35.7 7.5 27.1 6.5 17.1 5.8 10.2 10.9 6.3 16.4 7.4 20.2 8.2 23.1 11.2 24.3 14.5 26.3 10.4 29.6 7.4 34.5 7.5 40.8 7.6 44 12.2 42 18.4 39.3 26.6 29.5 35.3 24.2 39.2Z');
       heart.append(stroke);
       el.append(heart, node('span', 'calendar-number', String(date)));
     }
@@ -356,28 +356,15 @@
   }
   function renderGallery() {
     const grid = $('#gallery-grid');
-    const groups = new Map();
-    photos.forEach(photo => {
-      const group = photo.group || '웨딩 갤러리';
-      if (!groups.has(group)) groups.set(group, []);
-      groups.get(group).push(photo);
-    });
     grid.replaceChildren();
-    let photoIndex = 0;
-    groups.forEach((items, title) => {
-      const section = node('section', 'gallery-mood');
-      section.setAttribute('aria-label', title);
-      section.append(node('h3', 'gallery-mood-title', title));
-      const columns = node('div', 'gallery-mood-columns');
-      const left = node('div', 'gallery-column');
-      const right = node('div', 'gallery-column');
-      items.forEach((photo, index) => {
-        (index % 2 ? right : left).append(createGalleryPhoto(photo, photoIndex++));
-      });
-      columns.append(left, right);
-      section.append(columns);
-      grid.append(section);
+    const columns = node('div', 'gallery-columns');
+    const left = node('div', 'gallery-column');
+    const right = node('div', 'gallery-column');
+    photos.forEach((photo, index) => {
+      (index % 2 ? right : left).append(createGalleryPhoto(photo, index));
     });
+    columns.append(left, right);
+    grid.append(columns);
     state.galleryCount = photos.length;
     observeReveals(grid);
   }
