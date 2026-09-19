@@ -494,12 +494,12 @@
     list.setAttribute('aria-busy', 'true'); more.disabled = true;
     if (!append) { list.replaceChildren(node('p', '', '축하 글을 불러오고 있습니다.')); allGuestsBefore = null; }
     try {
-      if (!state.api) throw new Error('방명록 서버에 연결할 수 없습니다. 잠시 후 다시 확인해 주세요.');
       const data = await api(`/guestbook?limit=12${append && allGuestsBefore ? `&before=${allGuestsBefore}` : ''}`);
       if (!append) list.replaceChildren();
       data.items.forEach(entry => list.append(guestCard(entry)));
       if (!list.childElementCount) list.append(node('p', '', '아직 남겨진 축하 글이 없습니다. 첫 마음을 남겨주세요.'));
       allGuestsBefore = data.nextBefore; more.hidden = !allGuestsBefore;
+      observeReveals(list);
     } catch(error) {
       if (!append) list.replaceChildren(node('p', '', error.message));
       else toast(error.message);
