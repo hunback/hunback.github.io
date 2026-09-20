@@ -19,6 +19,7 @@ window.WEDDING_CONFIG = {
   // 각 kakaoPayUrl의 빈 따옴표 안에 송금 링크를 넣으면 해당 송금 버튼이 나타납니다.
   accounts: [
     { side: 'groom', role: '신랑', bank: '카카오뱅크', number: '3333-02-4301683', holder: '박훈백', kakaoPayUrl: '' },
+    { side: 'groom', role: '신랑 부모님', bank: '카카오뱅크', number: '3333-23-8145544', holder: '박대선 · 이유선 (예금주 이유선)', kakaoPayUrl: '' },
     { side: 'bride', role: '신부', bank: '카카오뱅크', number: '3333-06-5024327', holder: '최지우', kakaoPayUrl: '' },
     { side: 'bride', role: '신부 아버지', bank: '카카오뱅크', number: '3333-33-7728094', holder: '최완호', kakaoPayUrl: '' },
     { side: 'bride', role: '신부 어머니', bank: '우체국', number: '104877-02-252013', holder: '안효순', kakaoPayUrl: '' }

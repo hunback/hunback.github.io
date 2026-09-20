@@ -404,9 +404,12 @@ body.photo-open { overflow: hidden; }
 .profile-card .profile-portrait img { width: 100%; height: 100%; object-fit: cover; }
 .profile-card .profile-copy { grid-column: 2; grid-row: 1; padding: 0 0 13px; border-bottom: 1px solid #dedbdc; text-align: right; }
 .profile-card .profile-intro { grid-column: 2; grid-row: 2; margin: 0; text-align: right; font-size: clamp(10px,3vw,13px); line-height: 1.9; word-break: keep-all; }
+.profile-groom .profile-copy, .profile-groom .profile-intro { padding-right: 10px; }
 .profile-bride { grid-template-columns: minmax(0,1fr) 37%; }
 .profile-bride .profile-portrait { grid-column: 2; }
 .profile-bride .profile-copy, .profile-bride .profile-intro { grid-column: 1; }
+.profile-bride .profile-copy { padding-right: 0; padding-left: 10px; text-align: left; }
+.profile-bride .profile-intro { padding-left: 10px; text-align: left; }
 .profile-name { font-size: 17px; }
 .letter-copy { white-space: nowrap; font-size: clamp(12px, 3.6vw, 14px); }
 /* Compact share control; the full button remains in the page footer. */
