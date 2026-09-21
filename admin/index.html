@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#f5f1ec">
   <title>훈백 · 지우 사진 보관함</title>
   <link rel="stylesheet" href="admin.css?v=20260920-direct-upload">
-  <script src="admin.js?v=20260920-mybox-live" defer></script>
+  <script src="admin.js?v=20260921-gallery-admin" defer></script>
 </head>
 <body>
   <main class="admin-shell">
@@ -34,6 +34,15 @@
     </section>
 
     <section id="dashboard" hidden>
+      <nav class="toolbar" aria-label="관리자 탭"><button id="tab-photos" class="secondary-button" type="button" aria-pressed="true">하객 사진 보관함</button><button id="tab-gallery" class="secondary-button" type="button" aria-pressed="false">청첩장 갤러리</button></nav>
+      <section id="gallery-editor" hidden>
+        <h2>청첩장 갤러리</h2>
+        <p>화살표로 순서를 바꾸거나 원하는 위치 번호를 입력하세요. 사진 비율은 유지되며, 홀수는 왼쪽·짝수는 오른쪽에 배치됩니다. 저장하면 공개 청첩장에 반영됩니다.</p>
+        <div class="toolbar"><label class="secondary-button">사진 추가<input id="gallery-files" type="file" accept="image/jpeg,image/png,image/webp" multiple></label><button id="gallery-save" class="primary-button" type="button">변경 사항 저장</button><button id="gallery-reset" class="secondary-button" type="button">저장된 배치 불러오기</button></div>
+        <p id="gallery-status" class="status" role="status"></p>
+        <div id="gallery-items" class="photo-list"></div>
+      </section>
+      <section id="guest-archive">
       <div class="summary" aria-label="업로드 요약">
         <article><span>파일</span><strong id="total-count">0</strong></article>
         <article><span>사진</span><strong id="photo-count">0</strong></article>
@@ -46,6 +55,7 @@
       </div>
       <div id="photo-list" class="photo-list" aria-live="polite"></div>
       <button id="load-more" class="secondary-button load-more" type="button" hidden>더 보기</button>
+      </section>
     </section>
   </main>
 </body>

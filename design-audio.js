@@ -33,7 +33,7 @@
   let wantsMusic = true;
   let starting = null;
   function render() {
-    const playing = !audio.paused && !audio.ended;
+    const playing = wantsMusic;
     toggle.setAttribute('aria-pressed', String(playing));
     toggle.setAttribute('aria-label', playing ? '배경 음악 끄기' : '배경 음악 켜기');
     toggle.title = playing ? '배경 음악 끄기' : '배경 음악 켜기';
@@ -57,7 +57,7 @@
   document.addEventListener('click', unlock);
   document.addEventListener('keydown', unlock);
   toggle.addEventListener('click', () => {
-    if (!audio.paused || starting) {
+    if (wantsMusic) {
       wantsMusic = false; audio.pause(); render();
     } else {
       wantsMusic = true;
@@ -66,7 +66,10 @@
     }
   });
   audio.addEventListener('playing', () => { render(); status.textContent = '음악을 재생 중입니다.'; });
-  audio.addEventListener('pause', () => { render(); status.textContent = '음악이 꺼져 있습니다.'; });
+  audio.addEventListener('pause', () => { render(); if(!wantsMusic)status.textContent='음악이 꺼져 있습니다.';else if(!document.hidden)setTimeout(start,250); });
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&wantsMusic)start();});
+  window.addEventListener('pageshow',()=>{if(wantsMusic)start();});
+  audio.addEventListener('ended',()=>{if(wantsMusic)start();});
   audio.addEventListener('error', () => { render(); status.textContent = '음악을 불러오지 못했습니다. 버튼을 눌러 다시 시도해 주세요.'; });
   render();
   start();

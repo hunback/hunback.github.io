@@ -79,5 +79,45 @@
   $('#refresh').addEventListener('click', () => load());
   $('#load-more').addEventListener('click', () => load(true));
   window.addEventListener('pagehide', revokeUrls);
+  let gallery=[],galleryVersion=0,dirty=false,busy=false;
+  const galleryStatus=message=>{$('#gallery-status').textContent=message;};
+  const galleryUrl=p=>p.preview||(p.src.startsWith('/api/')?API.replace(/\/api$/,'')+p.src:'https://hunback.github.io/'+p.src);
+  function movePhoto(index,target){if(target<0||target>=gallery.length)return;gallery.splice(target,0,gallery.splice(index,1)[0]);dirty=true;drawGallery();}
+  function drawGallery(){
+    const list=$('#gallery-items');list.replaceChildren();
+    gallery.forEach((photo,index)=>{
+      const article=document.createElement('article');article.className='photo-card';
+      const img=new Image();img.src=galleryUrl(photo);img.alt=photo.alt;img.loading='lazy';img.style.cssText='width:100%;height:200px;object-fit:contain';
+      const controls=document.createElement('div');controls.className='photo-info';
+      const label=document.createElement('label');label.textContent=`${index%2?'오른쪽':'왼쪽'} · 위치 `;
+      const order=document.createElement('input');order.type='number';order.min=1;order.max=gallery.length;order.value=index+1;order.style.width='60px';order.setAttribute('aria-label',`사진 ${index+1} 위치`);order.onchange=()=>movePhoto(index,Number(order.value)-1);label.append(order);controls.append(label);
+      for(const [name,action] of [['앞으로',()=>movePhoto(index,index-1)],['뒤로',()=>movePhoto(index,index+1)],['갤러리에서 삭제',()=>{gallery.splice(index,1);dirty=true;drawGallery();}]]){
+        const button=document.createElement('button');button.type='button';button.className='download';button.textContent=name;button.disabled=(name==='앞으로'&&index===0)||(name==='뒤로'&&index===gallery.length-1);button.onclick=action;controls.append(button);
+      }
+      article.append(img,controls);list.append(article);
+    });galleryStatus(`${gallery.length}장${dirty?' · 저장하지 않은 변경 사항이 있습니다.':''}`);
+  }
+  async function loadGallery(){
+    if(busy)return;
+    try{const data=await(await request('/gallery')).json();gallery=data.items;galleryVersion=data.version;dirty=false;drawGallery();}catch(e){galleryStatus(e.message);}
+  }
+  function tab(name){$('#gallery-editor').hidden=name!=='gallery';$('#guest-archive').hidden=name==='gallery';$('#tab-gallery').setAttribute('aria-pressed',String(name==='gallery'));$('#tab-photos').setAttribute('aria-pressed',String(name!=='gallery'));if(name==='gallery'&&!dirty)loadGallery();}
+  $('#tab-gallery').onclick=()=>tab('gallery');$('#tab-photos').onclick=()=>tab('photos');
+  $('#gallery-reset').onclick=()=>{if(!dirty||confirm('저장하지 않은 변경을 취소하고 마지막 저장 상태로 돌아갈까요?'))loadGallery();};
+  $('#gallery-files').onchange=async event=>{
+    if(busy)return;busy=true;$('#gallery-save').disabled=true;event.target.disabled=true;
+    try{for(const file of event.target.files){
+      if(gallery.length>=150)throw Error('갤러리는 150장까지 저장할 수 있습니다.');
+      galleryStatus(`${file.name} 업로드 중…`);
+      const preview=URL.createObjectURL(file),img=new Image();img.src=preview;await img.decode();
+      let data;try{data=await(await request('/admin/gallery/upload',{method:'POST',headers:{'Content-Type':file.type},body:file})).json();}catch(e){URL.revokeObjectURL(preview);throw e;}
+      gallery.push({src:data.src,alt:file.name.replace(/\.[^.]+$/,''),width:img.naturalWidth,height:img.naturalHeight,preview});dirty=true;
+    }drawGallery();}catch(e){galleryStatus(e.message);}finally{busy=false;event.target.disabled=false;event.target.value='';$('#gallery-save').disabled=false;}
+  };
+  $('#gallery-save').onclick=async()=>{
+    if(busy)return;busy=true;$('#gallery-save').disabled=true;
+    try{const data=await(await request('/admin/gallery',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({version:galleryVersion,items:gallery.map(({preview,...p})=>p)})})).json();galleryVersion=data.version;dirty=false;drawGallery();galleryStatus('저장했습니다. 공개 청첩장을 새로 열면 반영됩니다.');}catch(e){galleryStatus(e.message);}finally{busy=false;$('#gallery-save').disabled=false;}
+  };
+  window.addEventListener('beforeunload',e=>{if(dirty||busy){e.preventDefault();e.returnValue='';}});
   const saved = sessionStorage.getItem('wedding-admin-token'); if (saved) unlock(saved);
 })();

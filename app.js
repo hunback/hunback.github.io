@@ -4,7 +4,7 @@
   // Local previews must stay off the production D1 endpoint. Exported pages keep the verified API.
   const localPreview = location.protocol === 'file:' || ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname) || window.WEDDING_OFFLINE_PREVIEW === true;
   if (localPreview) config.apiBase = '';
-  const photos = window.WEDDING_PHOTOS || [];
+  let photos = window.WEDDING_PHOTOS || [];
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const state = { api: false, mode: 'offline', before: null, galleryCount: 0, deleteId: null, toastTimer: null };
@@ -400,6 +400,7 @@
   let photoAnimation;
   let photoLoadingTimer;
   function photoSource(photo) {
+    if(photo.src)return photo.src.startsWith('/api/')?apiBase+photo.src:photo.src.replace(/-small(\.[^/]+)$/,'$1');
     return asset(`assets/photos/photo-${String(photo.id).padStart(2,'0')}.webp`);
   }
   function loadEnlargedPhoto(source, alt) {
@@ -486,7 +487,7 @@
       const button = node('button', 'gallery-photo protected-media'); button.type = 'button';
       button.setAttribute('aria-label', `${photo.alt} 크게 보기`);
       const img = node('img'); const stem = `assets/photos/photo-${String(photo.id).padStart(2,'0')}`;
-      img.src = window.WEDDING_ASSET_MAP ? asset(`${stem}-small.webp`) : `${stem}-small.webp`;
+      img.src = photo.src ? (photo.src.startsWith('/api/') ? apiBase+photo.src : photo.src) : (window.WEDDING_ASSET_MAP ? asset(`${stem}-small.webp`) : `${stem}-small.webp`);
       img.alt = photo.alt; img.width = photo.width; img.height = photo.height; img.style.setProperty('--photo-ratio', `${photo.width} / ${photo.height}`); img.loading = 'lazy'; img.decoding = 'async'; img.fetchPriority = 'low'; img.draggable = false;
       button.append(img); button.addEventListener('click', () => openPhoto(photo)); figure.append(button);
       return figure;
@@ -506,6 +507,9 @@
     observeReveals(grid);
   }
   renderGallery();
+  if(!localPreview)fetch(`${apiBase}/api/gallery`,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>{
+    if(data.version>0&&Array.isArray(data.items)&&!photoDialog.open){photos=data.items;renderGallery();}
+  }).catch(()=>{});
 
   function guestFlower() {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
