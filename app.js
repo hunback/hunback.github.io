@@ -367,7 +367,7 @@
           content: {
             title: '훈백과 지우가 결혼합니다',
             description: '2026년 12월 19일 토요일 낮 12시 30분 · 더테라스웨딩 11층 더테라스 홀',
-            imageUrl: 'https://hunback.github.io/assets/share/invitation-cover.jpg',
+            imageUrl: 'https://hunback.github.io/assets/share/invitation-sunglasses-20260921.jpg',
             imageWidth: 1333,
             imageHeight: 2000,
             link: {mobileWebUrl: url, webUrl: url}
@@ -618,12 +618,12 @@
     event.preventDefault(); const form=event.currentTarget; const button=$('.submit-button',form);button.disabled=true;
     try {await api(`/guestbook/${state.deleteId}/delete`,'POST',{password:form.elements.password.value});form.reset();$('#delete-dialog').close();await loadGuests();if ($('#guestbook-all-dialog').open) await loadAllGuests();toast('방명록을 삭제했습니다.');}catch(error){status(form,error.message);}finally{button.disabled=false;}
   });
-  for (const [side,label] of [['groom','신랑측 계좌번호'],['bride','신부측 계좌번호']]) {
+  for (const [side,label] of [['groom','신랑 측 계좌번호'],['bride','신부 측 계좌번호']]) {
     const details=node('details');details.open=true;details.append(node('summary','',label));const body=node('div','account-body');const accounts=(config.accounts||[]).filter(item=>item.side===side && item.bank && item.number && item.holder);
     accounts.forEach(account=>{
       const row=node('div','account-row');
       const person=node('p','account-person');
-      person.append(node('span','sr-only',`${account.role || (side==='groom'?'신랑측':'신부측')} `),node('strong','',account.holder));
+      person.append(node('span','sr-only',`${account.role || (side==='groom'?'신랑 측':'신부 측')} `),node('strong','',account.holder));
       const number=node('span','account-number',account.number);number.dir='ltr';
       const bankline=node('p','account-bankline');
       bankline.append(node('span','account-bank',account.bank), node('span','', ' | '),number);
@@ -680,7 +680,7 @@
   async function uploadSelectedFiles() {
     if (!state.api || ![...guestFiles.files].length || guestFiles.disabled) return;
     const files = [...guestFiles.files];
-    if (files.length > 20) { $('#upload-status').textContent = '한 번에는 20개씩 올려주세요.'; guestFiles.value=''; return; }
+    if (files.length > 20) { $('#upload-status').textContent = '한 번에는 20개씩 올려 주세요.'; guestFiles.value=''; return; }
     guestFiles.disabled = true;
     try {
     let sent = 0;

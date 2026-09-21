@@ -12,8 +12,8 @@
   <meta property="og:description" content="2026년 12월 19일 토요일 낮 12시 30분 · 더테라스웨딩">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://hunback.github.io/">
-  <meta property="og:image" content="https://hunback.github.io/assets/share/invitation-cover.jpg">
-  <meta property="og:image:alt" content="숲길에서 베일을 펼쳐 든 두 사람">
+  <meta property="og:image" content="https://hunback.github.io/assets/share/invitation-sunglasses-20260921.jpg">
+  <meta property="og:image:alt" content="선글라스를 쓰고 돌담 위에 나란히 선 두 사람">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1333">
   <meta property="og:image:height" content="2000">
@@ -22,9 +22,9 @@
   <link rel="stylesheet" href="design.css?v=20260920-profile-spacing">
   <script src="config.js?v=20260920-groom-parent-account" defer></script>
   <script src="photos.js" defer></script>
-<script src="design-data.js?v=20260920-guest-album" defer></script>
-  <script src="apply-content.js?v=20260920-final-media" defer></script>
-  <script src="app.js?v=20260920-mybox-final" defer></script>
+<script src="design-data.js?v=20260921-gallery-share" defer></script>
+  <script src="apply-content.js?v=20260921-gallery-share" defer></script>
+  <script src="app.js?v=20260921-gallery-share" defer></script>
   <script src="design-audio.js?v=20260920-final-media" defer></script>
   <script src="naver-map.js?v=20260920-final-media" defer></script>
 </head>
@@ -71,7 +71,7 @@
       <p>그런즉 이제 둘이 아니요 한 몸이니<br>그러므로 하나님이 짝지어 주신 것을<br>사람이 나누지 못할지니라</p>
       <cite>-마 19:6-</cite>
     </blockquote>
-    <div class="letter-copy reveal"><p>서로 다른 길을 걸어온 두 사람이<br>이제는 같은 길을 걸으려 합니다.<br>혼자보다 함께일 때 더 따뜻한 마음으로,<br>서로를 가장 편안한 안식처로 삼아<br>예쁘게 살겠습니다.<br>저희의 시작을 따듯한 마음으로<br>축복해 주시면 감사하겠습니다.</p></div>
+    <div class="letter-copy reveal"><p>서로 다른 길을 걸어온 두 사람이<br>이제는 같은 길을 걸으려 합니다.<br>혼자보다 함께일 때 더 따뜻한 마음으로,<br>서로를 가장 편안한 안식처로 삼아<br>예쁘게 살겠습니다.<br>저희의 시작을 따뜻한 마음으로<br>축복해 주시면 감사하겠습니다.</p></div>
     <hr class="letter-divider reveal" aria-hidden="true">
     <div class="family-lines reveal">
       <p>박대선 <span>·</span> 이유선 <small>의 장남</small><strong>훈백</strong></p>
@@ -164,7 +164,7 @@
     <p class="section-index">GUESTBOOK</p>
     <h2>방명록</h2>
     <div id="guestbook-list" class="guestbook-list" aria-live="polite" aria-busy="true"><article class="guest-card empty-card"><p>축하 글을 불러오고 있습니다.</p></article></div>
-    <div class="guestbook-actions"><button class="text-button" id="guestbook-open" type="button">작성하기</button><button class="text-button" id="guestbook-more" type="button">전체보기</button><button class="text-button" id="guestbook-retry" type="button" hidden>다시 불러오기</button></div>
+    <div class="guestbook-actions"><button class="text-button" id="guestbook-open" type="button">작성하기</button><button class="text-button" id="guestbook-more" type="button">전체 보기</button><button class="text-button" id="guestbook-retry" type="button" hidden>다시 불러오기</button></div>
     <p id="connection-status" class="connection-status" role="status"></p>
   </section>
 
@@ -182,7 +182,7 @@
     </div>
     <p class="section-index">CAPTURE OUR MOMENTS</p>
     <h2>축하 사진 공유</h2>
-    <p class="section-description">신랑신부의 행복한 순간을 담아주세요.<br>예식 당일, 아래 버튼으로 사진을 올려주세요.<br>많은 참여 부탁드려요!</p>
+    <p class="section-description">신랑 신부의 행복한 순간을 담아 주세요.<br>예식 당일, 아래 버튼으로 사진을 올려 주세요.<br>많은 참여 부탁드려요!</p>
     <div id="direct-upload" class="direct-upload" hidden>
       <label for="guest-files" class="outline-button guest-upload-button">사진 업로드</label>
       <input id="guest-files" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime" multiple>
@@ -216,7 +216,7 @@
 </div>
 
 <dialog id="guestbook-all-dialog" class="form-dialog" aria-labelledby="guestbook-all-title">
-  <header class="dialog-header"><h2 id="guestbook-all-title">방명록 전체보기</h2><button type="button" class="dialog-close" data-close aria-label="방명록 전체보기 닫기">×</button></header>
+  <header class="dialog-header"><h2 id="guestbook-all-title">방명록 전체 보기</h2><button type="button" class="dialog-close" data-close aria-label="방명록 전체 보기 닫기">×</button></header>
   <div id="guestbook-all-list" class="guestbook-all-list" aria-live="polite"></div>
   <button id="guestbook-all-next" class="text-button guestbook-load-more" type="button" hidden>더 불러오기</button>
 </dialog>

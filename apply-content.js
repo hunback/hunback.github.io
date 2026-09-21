@@ -260,7 +260,7 @@
       setMeta('meta[property="og:description"]', description);
     }
     if (!missing(links.invitation)) setMeta('meta[property="og:url"]', links.invitation);
-    const heroPath = localAsset(object(hero).path, '');
+    const heroPath = localAsset(object(photos.shareImage).path || object(hero).path, '');
     const canonical = text(links.invitation);
     if (heroPath && canonical) {
       try { setMeta('meta[property="og:image"]', new URL(heroPath, canonical.endsWith('/') ? canonical : `${canonical}/`).href); }
